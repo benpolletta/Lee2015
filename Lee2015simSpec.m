@@ -21,6 +21,10 @@ pop_list = {'supRS', 'supFS', 'supSI',...
 
 no_pops = length(pop_list);
 
+multicomp_pops = {'deepIB', 'deepRS'};
+
+compartments = {'dendrite', 'soma', 'axon'};
+
 included = ones(no_pops, 1);
 
 for e = 1:length(excluded)
@@ -28,6 +32,10 @@ for e = 1:length(excluded)
     included(contains(pop_list, excluded{e})) = 0;
     
     pop_list(contains(pop_list, excluded{e})) = [];
+    
+    multicomp_pops(contains(multicomp_pops, excluded{e})) = [];
+    
+    compartments(contains(compartments, excluded{e})) = [];
     
 end
 
@@ -132,10 +140,6 @@ for p = 1:no_pops
     end
     
 end
-
-multicomp_pops = {'deepIB', 'deepRS'};
-
-compartments = {'dendrite', 'soma', 'axon'};
 
 for p = 1:length(multicomp_pops)
     
