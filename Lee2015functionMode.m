@@ -6,7 +6,15 @@ if isempty(sim_struct); sim_struct = Lee2015initSimStruct; end
 Today = datestr(datenum(date),'yy-mm-dd');
 
 start_dir = pwd;
-cd /projectnb/crc-nak/brpp/Lee_2015
+try
+    cd /projectnb/crc-nak/brpp/Lee_2015
+catch
+end
+
+try
+    cd /Users/benjaminpittman-polletta/Documents/Science/Research_Projects/Lee_2015
+catch
+end
 
 savepath = fullfile(pwd, 'Sims', Today);
 mkdir(savepath);
