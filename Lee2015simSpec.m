@@ -1,4 +1,15 @@
-function sim_spec = Lee2015simSpec(column, ach_flag)
+function sim_spec = Lee2015simSpec(column, ach_flag, excluded)
+% INPUTS:
+% column (string): one of 'par', 'a1_2015', 'a1_2013'.
+% ach_flag (Boolean): determines whether conductances & connectivity 
+%   reflect high or low cholinergic tone.
+% excluded (1D cell of strings): populations to be left out of simulation.
+
+if nargin < 1, column = ''; end
+if isempty(column), column = 'par'; end
+if nargin < 2, ach_flag = []; end
+if isempty(ach_flag), ach_flag = 0; end
+if nargin < 3, excluded = {}; end
 
 sim_spec = struct();
 
@@ -10,11 +21,23 @@ pop_list = {'supRS', 'supFS', 'supSI',...
 
 no_pops = length(pop_list);
 
+included = ones(no_pops, 1);
+
+for e = 1:length(excluded)
+   
+    included(contains(pop_list, excluded{e})) = 0;
+    
+    pop_list(contains(pop_list, excluded{e})) = [];
+    
+end
+
+no_pops = length(pop_list);
+
 param_list = {'gleak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'gsyn'};
 
 no_params = length(param_list);
 
-conductance = get_conductance(column, ach_flag);
+conductance = get_conductance(column, ach_flag)*diag(included);
 
 for pop = 1:no_pops
 
@@ -34,11 +57,12 @@ for pop = 1:no_pops
 
 end
 
-no_pops = length(pop_list);
-
 mechanisms = {'iSYN', 'iNMDA', 'iGAP'};
 
 [fanout, gSYN] = get_connectivity(column, ach_flag);
+
+fanout = diag(included)*fanout*diag(included);
+gSYN = diag(included)*gSYN*diag(included);
 
 subcategories = {'FS', 'SI', 'sup', 'deep', 'IBaxon'};
 
