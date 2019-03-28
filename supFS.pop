@@ -1,0 +1,22 @@
+% Superficial RS (adapted from Lee 2015)
+% usage: dsPlot(dsSimulate('supRS','vary',{'RS','Iapp',5}))
+
+supFS:
+dV/dt=(Iapp+@current)./Cm; {FSiNaF,FSiKDR,ileak}@current; V(0)=-65;
+gNaF=100; gKDR=80;
+
+Cm=.9; gleak=0.1; Iapp=2;
+
+% Reference:
+% Kramer, M. A., Roopun, A. K., Carracedo, L. M., Traub, R. D., Whittington, M. A., & Kopell, N. J. (2008). Rhythm generation through period concatenation in rat somatosensory cortex. PLoS computational biology, 4(9), e1000169. (http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1000169)
+
+% CAUTION: this model is a work-in-progress and provided "AS IS". Tonic
+% stimulation and noise differ from Kramer 2008.
+
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.

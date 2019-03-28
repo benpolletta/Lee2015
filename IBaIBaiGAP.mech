@@ -1,0 +1,12 @@
+g_GAP = [0.002]
+ 
+fanout_GAP = inf
+UB = max(Npre,Npost)
+Xpre = linspace(1,UB,Npre)'*ones(1,Npost)
+Xpost = (linspace(1,UB,Npost)'*ones(1,Npre))'
+mask = abs(Xpre-Xpost)<=fanout
+
+IGAP(IN,OUT) = g_GAP.*sum(((IN'*ones(1,size(IN',1)))'-(OUT'*ones(1,size(OUT',1)))).*mask,2)'
+ 
+@current += IGAP(Vpre,Vpost)
+ 

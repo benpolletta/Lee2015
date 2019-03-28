@@ -1,0 +1,15 @@
+% Tonic current injection Bens version
+
+I_app = -6
+ton = 500
+toff = T(end)
+Inoise = .1
+
+IBen(t)=I_app*((t/ton)*(t<=ton)+(ton<t&t<toff)+rand(1,Npop)*Inoise)
+%IBen(t)=I_app*((t/ton)*(t<=ton)+(ton<t&t<toff))
+
+% *((1-pulse/2)+pulse*(mod(t,750)<250&t>2*ton));',...
+
+% Linkers
+@current += -IBen(t)
+

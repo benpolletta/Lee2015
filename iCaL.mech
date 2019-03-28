@@ -1,0 +1,22 @@
+% CaL from Jung Lee et al. 2015.
+% Parameters.
+ECaL=125
+gCaL=0.5
+IC = [0]
+IC_noise = [0.01]
+
+% Functions.
+minf(X)=1./(1+exp(-(X+56)./6.2));
+taum(X)=0.204+0.333./(exp((X+15.8)./18.2)+exp(-(V+131)./16.7));
+hinf(X)=1./(1+exp((X+80)./4));
+tauh(X)=double(X<-81).*0.333.*exp((X+466)/66.6)+double(X>=-81).*(9.32+0.333.*exp(-(X+21)./10.5));
+ICaL(X,mCaL,hCaL)=gCaL.*(mCaL.^2).*(hCaL.^2).*(X-ECaL);
+
+% ODEs.
+mCaL'=(minf(X)-mCaL)./taum(X);
+hCaL'=(hinf(X)-hCaL)./tauh(X);
+mCaL(0)=IC+IC_noise.*rand(Npop,1)
+hCaL(0)=IC+IC_noise.*rand(Npop,1)
+
+% Linkers.
+@current+=ICaL(X,mCaL,hCaL)
