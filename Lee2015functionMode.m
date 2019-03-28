@@ -24,7 +24,7 @@ name = sprintf('Lee2015_%g_%g_%.4g', Now(4), Now(5), Now(6));
 
 unpack_sim_struct
 
-sim_spec = Lee2015simSpec(column, ach_flag);
+sim_spec = Lee2015simSpec(column, ach_flag, excluded);
 
 save(fullfile(savepath, [name, '_sim_spec.mat']), 'sim_spec', 'sim_struct', 'vary', 'name');
 
