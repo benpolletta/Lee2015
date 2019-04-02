@@ -6,6 +6,7 @@ if isempty(sim_struct); sim_struct = Lee2015initSimStruct; end
 Today = datestr(datenum(date),'yy-mm-dd');
 
 start_dir = pwd;
+
 try
     cd /projectnb/crc-nak/brpp/Lee_2015
 catch
@@ -24,7 +25,7 @@ name = sprintf('Lee2015_%g_%g_%.4g', Now(4), Now(5), Now(6));
 
 unpack_sim_struct
 
-sim_spec = Lee2015simSpec(column, ach_flag, excluded);
+sim_spec = Lee2015simSpec(column, ach_flag, cluster_flag, excluded);
 
 save(fullfile(savepath, [name, '_sim_spec.mat']), 'sim_spec', 'sim_struct', 'vary', 'name');
 
@@ -57,21 +58,17 @@ else
         
 end
 
-close('all')
-
 dsPlot(data)
+    
+saveas(gcf, fullfile(savepath, [name, '.fig']))
+
+save_as_pdf(gcf, fullfile(savepath, name))
 
 dsPlot(data, 'plot_type', 'rastergram')
-
-figHandles = findobj('Type', 'Figure');
-
-for f = 1:length(figHandles)
     
-    saveas(figHandles(f), fullfile(savepath, [name, '_', num2str(f), '.fig']))
+saveas(gcf, fullfile(savepath, [name, '_raster.fig']))
 
-    save_as_pdf(figHandles(f), fullfile(savepath, [name, '_', num2str(f)]))
-    
-end
+save_as_pdf(gcf, fullfile(savepath, [name, '_raster']))
 
 cd (start_dir)
 
