@@ -28,18 +28,22 @@ multicomp_pops = {'deepIB', 'deepRS'};
 compartments = {'dendrite', 'soma', 'axon'};
 
 included = true(no_pops, 1);
+mc_pops_included = true(length(multicomp_pops), 1);
+comps_included = true(length(compartments), 1);
 
 for e = 1:length(excluded)
    
     included(contains(pop_list, excluded{e})) = false;
     
-    pop_list(contains(pop_list, excluded{e})) = [];
+    mc_pops_included(contains(multicomp_pops, excluded{e})) = [];
     
-    multicomp_pops(contains(multicomp_pops, excluded{e})) = [];
-    
-    compartments(contains(compartments, excluded{e})) = [];
+    comps_included(contains(compartments, excluded{e})) = [];
     
 end
+
+pop_list(~included) = [];
+multicomp_pops(~mc_pops_included) = [];
+compartments(~comps_included) = [];
 
 no_pops = length(pop_list);
 
