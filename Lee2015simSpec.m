@@ -1,4 +1,4 @@
-function sim_spec = Lee2015simSpec(column, ach_flag, excluded)
+function sim_spec = Lee2015simSpec(column, ach_flag, cluster_flag, excluded)
 % INPUTS:
 % column (string): one of 'par', 'a1_2015', 'a1_2013'.
 % ach_flag (Boolean): determines whether conductances & connectivity 
@@ -9,7 +9,9 @@ if nargin < 1, column = ''; end
 if isempty(column), column = 'par'; end
 if nargin < 2, ach_flag = []; end
 if isempty(ach_flag), ach_flag = 0; end
-if nargin < 3, excluded = {}; end
+if nargin < 3, cluster_flag = []; end
+if isempty(cluster_flag), cluster_flag = 0; end
+if nargin < 4, excluded = {}; end
 
 sim_spec = struct();
 
@@ -25,11 +27,11 @@ multicomp_pops = {'deepIB', 'deepRS'};
 
 compartments = {'dendrite', 'soma', 'axon'};
 
-included = ones(no_pops, 1);
+included = true(no_pops, 1);
 
 for e = 1:length(excluded)
    
-    included(contains(pop_list, excluded{e})) = 0;
+    included(contains(pop_list, excluded{e})) = false;
     
     pop_list(contains(pop_list, excluded{e})) = [];
     
@@ -45,7 +47,9 @@ param_list = {'gleak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'gsyn'};
 
 no_params = length(param_list);
 
-conductance = get_conductance(column, ach_flag)*diag(included);
+conductance = get_conductance(column, ach_flag);
+
+conductance = conductance(:, included);
 
 for pop = 1:no_pops
 
@@ -69,8 +73,8 @@ mechanisms = {'iSYN', 'iNMDA', 'iGAP'};
 
 [fanout, gSYN] = get_connectivity(column, ach_flag);
 
-fanout = diag(included)*fanout*diag(included);
-gSYN = diag(included)*gSYN*diag(included);
+fanout = fanout(included, included);
+gSYN = gSYN(included, included);
 
 subcategories = {'FS', 'SI', 'sup', 'deep', 'IBaxon'};
 
@@ -125,7 +129,15 @@ for p = 1:no_pops
             
             C_index = C_index + 1;
             
-            sim_spec.connections(C_index).direction = [pop_list{p}, '->', pop_list{q}];
+            if cluster_flag
+                
+                sim_spec.connections(C_index).direction = [pop_list{p}, '->', pop_list{q}];
+                
+            else
+                
+                sim_spec.connections(C_index).direction = [pop_list{q}, '->', pop_list{p}];
+                
+            end
             
             sim_spec.connections(C_index).mechanism_list = mechanisms(1:no_mechanisms(p,q));
             
@@ -153,7 +165,15 @@ for p = 1:length(multicomp_pops)
         
         post_name = [pop_name, compartments{c + 1}];
         
-        sim_spec.connections(C_index).direction = [pre_name, '->', post_name];
+        if cluster_flag
+            
+            sim_spec.connections(C_index).direction = [pre_name, '->', post_name];
+            
+        else
+            
+            sim_spec.connections(C_index).direction = [post_name, '->', pre_name];
+            
+        end
         
         sim_spec.connections(C_index).mechanism_list = {'iCOM'};
         
