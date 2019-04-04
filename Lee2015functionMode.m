@@ -8,22 +8,24 @@ Today = datestr(datenum(date),'yy-mm-dd');
 start_dir = pwd;
 
 try
-    cd /projectnb/crc-nak/brpp/Lee_2015
-catch
+    cd /projectnb/crc-nak/brpp/Lee2015/
+catch err
+    display(err)
 end
 
 try
-    cd /Users/benjaminpittman-polletta/Documents/Science/Research_Projects/Lee_2015
-catch
+    cd /Users/benjaminpittman-polletta/Documents/Science/Research_Projects/Lee2015
+catch err
+    display(err)
 end
 
 savepath = fullfile(pwd, 'Sims', Today);
 mkdir(savepath);
 
-Now = clock;
-name = sprintf('Lee2015_%g_%g_%.4g', Now(4), Now(5), Now(6));
-
 unpack_sim_struct
+
+Now = clock;
+name = sprintf('%s_ach%d_NO_%s_%g_%g_%.4g', column, ach_flag, strcat(excluded{:}), Now(4), Now(5), Now(6));
 
 sim_spec = Lee2015simSpec(column, ach_flag, cluster_flag, excluded);
 
