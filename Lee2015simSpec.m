@@ -35,9 +35,9 @@ for e = 1:length(excluded)
    
     included(contains(pop_list, excluded{e})) = false;
     
-    mc_pops_included(contains(multicomp_pops, excluded{e})) = [];
+    mc_pops_included(contains(multicomp_pops, excluded{e})) = false;
     
-    comps_included(contains(compartments, excluded{e})) = [];
+    comps_included(contains(compartments, excluded{e})) = false;
     
 end
 
@@ -163,23 +163,27 @@ for p = 1:length(multicomp_pops)
     
     for c = 1:(length(compartments) - 1)
         
-        C_index = C_index + 1;
-        
         pre_name = [pop_name, compartments{c}];
         
         post_name = [pop_name, compartments{c + 1}];
         
-        if cluster_flag
+        if sum(contains(excluded, pre_name)) + sum(contains(excluded, post_name)) < 1
+        
+            C_index = C_index + 1;
             
-            sim_spec.connections(C_index).direction = [pre_name, '->', post_name];
+            if cluster_flag
+                
+                sim_spec.connections(C_index).direction = [pre_name, '->', post_name];
+                
+            else
+                
+                sim_spec.connections(C_index).direction = [post_name, '->', pre_name];
+                
+            end
             
-        else
-            
-            sim_spec.connections(C_index).direction = [post_name, '->', pre_name];
+            sim_spec.connections(C_index).mechanism_list = {'iCOM'};
             
         end
-        
-        sim_spec.connections(C_index).mechanism_list = {'iCOM'};
         
     end
     
