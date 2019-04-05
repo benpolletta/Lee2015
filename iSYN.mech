@@ -6,10 +6,15 @@ IC = [0.1]
 IC_noise = [0]
  
 fanout = inf
-UB = max(Npre,Npost)
-Xpre = linspace(1,UB,Npre)'*ones(1,Npost)
-Xpost = ones(Npre, 1)*linspace(1,UB,Npost)
-mask = Xpre-Xpost >= 0 & Xpre-Xpost < fanout | Xpre-Xpost < 0 & UB-(Xpost-Xpre) < fanout
+% UB = max(Npre,Npost)
+% Xpre = linspace(1,UB,Npre)'*ones(1,Npost)
+% Xpost = ones(Npre, 1)*linspace(1,UB,Npost)
+% leftperm = zeros(Npre);
+% rightperm = zeros(Npost);
+% left_column_indices = randperm(Npre); right_row_indices = randperm(Npost);
+% for i = 1:Npre
+% mask = Xpre-Xpost >= 0 & Xpre-Xpost < fanout | Xpre-Xpost < 0 & UB-(Xpost-Xpre) < fanout
+mask = makeSYNmask(Npre, Npost, fanout)
 
 gsyn=unifrnd(gSYN-.01,gSYN+.01,[1 Npost])
 ISYN(V,s) = gsyn.*(s*mask).*(V-ESYN)
