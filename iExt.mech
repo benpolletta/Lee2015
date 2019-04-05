@@ -1,0 +1,15 @@
+% iExt.mech (connection mechanism: spikes from precomputed and saved spike train)
+% Poisson exponential synapse (one-to-one connectivity)
+
+rate=100; 	% Hz, Poisson spike rate
+Tend=T(end); 	% ms, duration
+tauD=2; 	% ms, exponential decay time constant
+Pmax=1; 	% conductance step on spike
+gExt=1;		% input strength
+EExt=0;
+
+p = multi_Poisson_matlab(Npop, 1, rate, Pmax, tauD, Tend, dt)
+
+psps(t) = gExt.*p(:, max(1,round(t/dt)))';
+Itrain(t,V) = psps(t).*(V-EExt);
+@current += -Itrain(t,V)
