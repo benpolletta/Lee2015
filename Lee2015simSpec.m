@@ -1,4 +1,4 @@
-function sim_spec = Lee2015simSpec(column, ach_flag, cluster_flag, excluded)
+function [sim_spec, label] = Lee2015simSpec(column, ach_flag, cluster_flag, excluded)
 % INPUTS:
 % column (string): one of 'par', 'a1_2015', 'a1_2013'.
 % ach_flag (Boolean): determines whether conductances & connectivity 
@@ -44,6 +44,26 @@ end
 pop_list(~included) = [];
 multicomp_pops(~mc_pops_included) = [];
 compartments(~comps_included) = [];
+
+label = sprintf('%s_ach%d_%s', column, ach_flag);
+
+if ~isempty(excluded)
+    
+    excluded_label = ['NO_', strcat(excluded{:})]; 
+    
+    included_label = strcat(pop_list{:});
+    
+    if length(excluded_label) < length(included_label)
+        
+        label = [label, excluded_label];
+        
+    else
+        
+        label = [label, included_label];
+        
+    end
+
+end
 
 no_pops = length(pop_list);
 

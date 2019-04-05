@@ -24,10 +24,10 @@ mkdir(savepath);
 
 unpack_sim_struct
 
-Now = clock;
-name = sprintf('%s_ach%d_NO_%s_%g_%g_%.4g', column, ach_flag, strcat(excluded{:}), Now(4), Now(5), Now(6));
+[sim_spec, sim_label] = Lee2015simSpec(column, ach_flag, cluster_flag, excluded);
 
-sim_spec = Lee2015simSpec(column, ach_flag, cluster_flag, excluded);
+Now = clock;
+name = sprintf('%s_%g_%g_%.4g', sim_label, Now(4), Now(5), Now(6));
 
 save(fullfile(savepath, [name, '_sim_spec.mat']), 'sim_spec', 'sim_struct', 'vary', 'name');
 
