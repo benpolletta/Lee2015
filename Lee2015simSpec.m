@@ -47,7 +47,7 @@ compartments(~comps_included) = [];
 
 no_pops = length(pop_list);
 
-param_list = {'gleak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'gsyn'};
+param_list = {'gleak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'gExt', 'rate'};
 
 no_params = length(param_list);
 
@@ -203,7 +203,8 @@ switch column
             zeros(1, 13);... % g_CaL
             zeros(1, 13);... % g_h
             0, 0, -1, -1, 2, 2, 1, 1, 2, 1, 1, 0, -1;... % Iapp
-            .2, .02, 0, 1, .03, 3, 0, 0, 3, zeros(1, 4)]; % g_ext
+            .2, .02, 0, 1, .03, 3, 0, 0, 3, zeros(1, 4);... % g_ext
+            50, 0, 0, 100, 100, zeros(1,8)];... % rate
         
     case 'a1_2015'
         
@@ -213,7 +214,8 @@ switch column
             0, 0, 1, zeros(1, 9), 0.3;... % g_CaL
             zeros(1, 13);... % g_h
             -2, 0, 0, -10, -5, -5, -1.4, 0.8, -5, -1.4, 0.8, 4, -4;... % Iapp
-            .5, 0, 0, 0.1, .03, 0.1, 0, 0, 0.1, zeros(1, 4)]; % g_ext
+            .5, 0, 0, 0.1, .03, 0.1, 0, 0, 0.1, zeros(1, 4);... % g_ext
+            100*ones(1, 13)]; % rate
         
         if ach_flag
             
@@ -232,7 +234,8 @@ switch column
             0, 0, 1, zeros(1, 9), 0.5;... % g_CaL
             zeros(1, 5), 0.1, 0, 0, 0.1, zeros(1,4);... % g_h
             -4, 2, 2, 0, -4, -5, -5, -5, -1, -3, -2, 0, -3;... % Iapp
-            0.6, 0, 0, 0.2, 0.1, zeros(1, 8)]; % g_ext
+            0.6, 0, 0, 0.2, 0.1, zeros(1, 8);... % g_ext
+            100*ones(1,13)]; % rate
         
         if ach_flag
             
