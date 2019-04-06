@@ -1,0 +1,40 @@
+# globals
+*~
+#*#
+
+# octave files
+octave-core
+
+# these files got dumped for some reason
+core.*
+
+
+# Mac/Linux/Windows files
+*.DS_Store
+.DS_Store
+Thumbs.db
+
+# Server files
+.nfs*
+
+# Dropbox files
+.dropbox.attr
+
+# Publish
+#html
+
+# DynaSim output files
+solve_ode_*
+params.mat
+
+# Other .mat files
+*.mat
+
+# Study folders
+study_*
+
+
+# Cluster files
+localOutput
+matlab_multi_node_batch.sh.*
+cluster_*
