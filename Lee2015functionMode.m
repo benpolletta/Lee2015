@@ -7,17 +7,9 @@ Today = datestr(datenum(date),'yy-mm-dd');
 
 start_dir = pwd;
 
-try
-    cd /projectnb/crc-nak/brpp/Lee2015/
-catch err
-    display(err)
-end
+% CD_ben;
+CD_dave;
 
-try
-    cd /Users/benjaminpittman-polletta/Documents/Science/Research_Projects/Lee2015
-catch err
-    display(err)
-end
 
 savepath = fullfile(pwd, 'Sims', Today);
 mkdir(savepath);
