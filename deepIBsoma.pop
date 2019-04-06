@@ -2,7 +2,7 @@
 % usage: dsPlot(dsSimulate('IBsoma','vary',{'IBsoma','Iapp',5}))
 
 deepIBsoma:
-dV/dt=(Iapp+@current)./Cm; {IBiNaF,IBiKDR,ileak}@current; V(0)=-65;
+dV/dt=(Iapp+@current)./Cm; {IBiNaF,IBiKDR,iLeak}@current; V(0)=-65;
 gNaF=100; gKDR=80;
 
 Cm=.9; gleak=0.1; Iapp=-5;

@@ -2,7 +2,7 @@
 % usage: dsPlot(dsSimulate('deepSI','vary',{'deepSI','Iapp',5}))
 
 deepSI:
-dV/dt=(Iapp+@current)./Cm; {FSiNaF,FSiKDR,ileak,IBiM,iCaL}@current; V(0)=-65;
+dV/dt=(Iapp+@current)./Cm; {FSiNaF,FSiKDR,iLeak,IBiM,iCaL}@current; V(0)=-65;
 gNaF=100; gKDR=80;
 
 Cm=.9; gleak=0.1; gM=3; gCaL=0.5; Iapp=-3;

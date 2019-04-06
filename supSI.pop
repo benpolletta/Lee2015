@@ -2,7 +2,7 @@
 % usage: dsPlot(dsSimulate('supRS','vary',{'RS','Iapp',5}))
 
 supSI:
-dV/dt=(Iapp+@current)./Cm; {FSiNaF,FSiKDR,ileak,IBiM,iCaL}@current; V(0)=-65;
+dV/dt=(Iapp+@current)./Cm; {FSiNaF,FSiKDR,iLeak,IBiMMich,iCaL}@current; V(0)=-65;
 gNaF=100; gKDR=80;
 
 Cm=.9; gleak=0.1; gM=3; gCaL=0.1; Iapp=2;

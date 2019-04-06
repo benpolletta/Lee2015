@@ -2,7 +2,7 @@
 % usage: dsPlot(dsSimulate('deepRSaxon','vary',{'deepRSaxon','Iapp',5}))
 
 deepRSaxon:
-dV/dt=(Iapp+@current)./Cm; {IBiNaF,IBiKDR,ileak,IBiM}@current; V(0)=-65;
+dV/dt=(Iapp+@current)./Cm; {IBiNaF,IBiKDR,iLeak,IBiM}@current; V(0)=-65;
 gNaF=100; gKDR=80;
 
 Cm=.9; gleak=0.1; gM=8; Iapp=-2;
