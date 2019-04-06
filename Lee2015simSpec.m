@@ -45,13 +45,13 @@ pop_list(~included) = [];
 multicomp_pops(~mc_pops_included) = [];
 compartments(~comps_included) = [];
 
-label = sprintf('%s_ach%d_%s', column, ach_flag);
+label = sprintf('%s_ach%d', column, ach_flag);
 
 if ~isempty(excluded)
     
-    excluded_label = ['NO_', strcat(excluded{:})]; 
+    excluded_label = ['_NO_', strcat(excluded{:})]; 
     
-    included_label = strcat(pop_list{:});
+    included_label = ['_', strcat(pop_list{:})];
     
     if length(excluded_label) < length(included_label)
         

@@ -66,6 +66,8 @@ if cluster_flag
 
 else
     
+    if isempty(vary), parallel_flag = 0; end
+    
     tic;
     
     data = dsSimulate(sim_spec,'tspan',tspan,'downsample_factor',dsfact,'solver',solver,'coder',0,...
