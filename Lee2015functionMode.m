@@ -5,7 +5,6 @@ if isempty(sim_struct); sim_struct = Lee2015initSimStruct; end
 
 % Setup path
 restoredefaultpath
-addpath(genpath('submodules'));
 
 Today = datestr(datenum(date),'yy-mm-dd');
 
@@ -14,7 +13,7 @@ start_dir = pwd;
 % Try-catch loops for changing directories
 CD_ben;
 CD_dave;
-
+addpath(genpath(pwd)); % Need to add working directory (i.e., Lee2015) to path.
 
 savepath = fullfile(pwd, 'Sims', Today);
 mkdir(savepath);
@@ -102,7 +101,7 @@ function CD_ben
     end
 
     try
-        cd /Users/benjaminpittman-polletta/Documents/Science/Research_Projects/Lee2015
+        cd /Users/benjaminpittman-polletta/Documents/Science/Research_Projects/Lee2015/
     catch err
         display(err)
     end
