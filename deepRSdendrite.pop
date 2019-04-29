@@ -5,7 +5,7 @@ deepRSdendrite:
 dV/dt=@current./Cm; {iTonic,IBiNaF,IBiKDR,iLeak,IBiMMich,IBiCaH,IBiAR,iExt}@current; V(0)=-65;
 gNaF=100; gKDR=80;
 
-Cm=.9; gleak=0.1; gM=3; gCaH=2; gAR=0.1; Iapp=-1; gExt=0;
+Cm=.9; gleak=0.1; gM=3; gCaH=2; gAR=0.1; Iapp=-1; IappSTD=0.3; gExt=0;
 
 % Reference:
 % Kramer, M. A., Roopun, A. K., Carracedo, L. M., Traub, R. D., Whittington, M. A., & Kopell, N. J. (2008). Rhythm generation through period concatenation in rat somatosensory cortex. PLoS computational biology, 4(9), e1000169. (http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1000169)
