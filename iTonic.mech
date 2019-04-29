@@ -1,0 +1,14 @@
+% Tonic current injection for Lee 2015 model.
+
+Iapp = -6
+IappSTD = .1
+ton = 500
+toff = T(end)
+
+gTonic = Iapp+randn(1,Npop)*IappSTD;
+
+ITonic(t)=gTonic.*((t/ton)*(t<=ton)+(ton<t&t<toff));
+
+% Linkers
+@current += -ITonic(t)
+
