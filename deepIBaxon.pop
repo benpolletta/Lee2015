@@ -2,7 +2,7 @@
 % usage: dsPlot(dsSimulate('IBaxon','vary',{'IBaxon','Iapp',5}))
 
 deepIBaxon:
-dV/dt=(Iapp+@current)./Cm; {IBiNaF,IBiKDR,iLeak,IBiMMich}@current; V(0)=-65;
+dV/dt=@current./Cm; {iTonic,IBiNaF,IBiKDR,iLeak,IBiMMich}@current; V(0)=-65;
 gNaF=100; gKDR=80;
 
 Cm=.9; gleak=0.1; gM=8; Iapp=-5;

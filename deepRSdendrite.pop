@@ -2,7 +2,7 @@
 % usage: dsPlot(dsSimulate('deepRSdendrite','vary',{'deepRSdendrite','Iapp',5}))
 
 deepRSdendrite:
-dV/dt=(Iapp+@current)./Cm; {IBiNaF,IBiKDR,iLeak,IBiMMich,IBiCaH,IBiAR,iExt}@current; V(0)=-65;
+dV/dt=@current./Cm; {iTonic,IBiNaF,IBiKDR,iLeak,IBiMMich,IBiCaH,IBiAR,iExt}@current; V(0)=-65;
 gNaF=100; gKDR=80;
 
 Cm=.9; gleak=0.1; gM=3; gCaH=2; gAR=0.1; Iapp=-1; gExt=0;
