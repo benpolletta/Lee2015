@@ -20,7 +20,7 @@ mkdir(savepath);
 
 unpack_sim_struct
 
-[sim_spec, sim_label] = Lee2015simSpec(column, ach_flag, cluster_flag, excluded);
+[sim_spec, sim_label] = Lee2015simSpec(column, ach_flag, cluster_flag, excluded, column_name);
 
 Now = clock;
 name = sprintf('%s_%g_%g_%.4g', sim_label, Now(4), Now(5), Now(6));
@@ -94,6 +94,7 @@ end
 
 
 function CD_ben
+
     try
         cd /projectnb/crc-nak/brpp/Lee2015/
     catch err
@@ -109,6 +110,7 @@ function CD_ben
 end
 
 function CD_dave
+
     try
         cd ~/src/Lee2015/
     catch err
@@ -120,4 +122,5 @@ function CD_dave
     % catch err
     %     display(err)
     % end
+    
 end
