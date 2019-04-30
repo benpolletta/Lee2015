@@ -1,5 +1,5 @@
 % Superficial RS (adapted from Lee 2015)
-% usage: dsPlot(dsSimulate('supRS','vary',{'RS','Iapp',5}))
+% usage: dsPlot(dsSimulate('supRS','vary',{'supSI','Iapp',5}))
 
 supSI:
 dV/dt=@current./Cm; {iTonic,FSiNaF,FSiKDR,iLeak,IBiMMich,iCaL}@current; V(0)=-65;
