@@ -173,7 +173,7 @@ end
 
 no_pops = length(pop_list); % pop_names = cellfun(@(x) [column_name, x], pop_list, 'UniformOutput', 0);
 
-param_list = {'gleak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'IappSTD', 'gExt', 'rate', 'frequency'};
+param_list = {'gLeak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'IappSTD', 'gExt', 'rate', 'frequency'};
 
 no_params = length(param_list);
 

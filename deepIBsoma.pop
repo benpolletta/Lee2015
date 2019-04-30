@@ -5,7 +5,7 @@ deepIBsoma:
 dV/dt=@current./Cm; {iTonic,IBiNaF,IBiKDR,iLeak}@current; V(0)=-65;
 gNaF=100; gKDR=80;
 
-Cm=.9; gleak=0.1; Iapp=-5; IappSTD=0.1;
+Cm=.9; gLeak=0.1; Iapp=-5; IappSTD=0.1;
 
 % Reference:
 % Kramer, M. A., Roopun, A. K., Carracedo, L. M., Traub, R. D., Whittington, M. A., & Kopell, N. J. (2008). Rhythm generation through period concatenation in rat somatosensory cortex. PLoS computational biology, 4(9), e1000169. (http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1000169)
