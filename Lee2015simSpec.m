@@ -1,9 +1,11 @@
-function [sim_spec, label] = Lee2015simSpec(column, ach_flag, cluster_flag, excluded)
+function [sim_spec, label] = Lee2015simSpec(column, ach_flag, cluster_flag, excluded, column_name)
 % INPUTS:
-% column (string): one of 'par', 'a1_2015', 'a1_2013'.
-% ach_flag (Boolean): determines whether conductances & connectivity 
+% column (string or cell of strings): one of 'par', 'a1_2015', 'a1_2013'.
+% ach_flag (Boolean or vector of Booleans): determines whether conductances & connectivity 
 %   reflect high or low cholinergic tone.
 % excluded (1D cell of strings): populations to be left out of simulation.
+% column_name (string or cell of strings): prefix(es) to be prepended to
+%   population names, in case of multiple columns.
 
 if nargin < 1, column = ''; end
 if isempty(column), column = 'par'; end
@@ -12,6 +14,110 @@ if isempty(ach_flag), ach_flag = 0; end
 if nargin < 3, cluster_flag = []; end
 if isempty(cluster_flag), cluster_flag = 0; end
 if nargin < 4, excluded = {}; end
+if nargin < 5, column_name = ''; end
+
+%% In case more than one column.
+
+if iscell(column_name)
+    
+    sim_spec = struct();
+   
+    for c = 1:length(column_name)
+        
+        if iscell(column)
+            
+            column_index = min(length(column), c);
+            column_type = column{column_index};
+            
+        elseif isstr(column)
+            
+            column_type = column;
+            
+        end
+       
+        ach_index = min(length(ach_flag), c);
+       
+        [column_sim_spec, label] = Lee2015simSpec(column_type, ach_flag(ach_index), cluster_flag, excluded, column_name{c});
+        
+        if isfield(sim_spec, 'populations')
+        
+            sim_spec.populations = [sim_spec.populations column_sim_spec.populations];
+            sim_spec.connections = [sim_spec.connections column_sim_spec.connections];
+            
+        else
+            
+            sim_spec = column_sim_spec;
+            
+        end
+        
+    end
+    
+    [pop_list{1:length(sim_spec.populations)}] = sim_spec.populations.name;
+    
+    if any(contains(column, '2013'))
+       
+        subcategories = {'deepIBaxon', 'deepRSaxon', 'supFS', 'supSI', column_name{:}};
+        
+        for s = 1:length(subcategories)
+            
+            eval([subcategories{s}, '_index = contains(pop_list, "', subcategories{s}, '");'])
+            
+        end
+        
+        for c = 1:length(column_name)
+            
+            eval(['deepE_index = deepIBaxon_index | deepRSaxon_index & ', column_name{c}, '_index;'])
+            
+            for d = 1:length(column_name)
+                
+                eval(['supFS_index = supFS_index & ', column_name{d}, '_index;'])
+                eval(['supSI_index = supSI_index & ', column_name{d}, '_index;'])
+                
+                deepEtosupFS = double(deepE_index)'*double(supFS_index);
+                deepEtosupSI = double(deepE_index)'*double(supSI_index);
+                
+                fanout = 2*(deepEtosupFS + deepEtosupSI);
+                gSYN = .2*deepEtosupFS + .3*deepEtosupSI;
+                tauRx = .25*deepEtosupFS + 2.5*deepEtosupSI;
+                tauDx = deepEtosupFS + 50*deepEtosupSI;
+                
+                [I, J] = find(gSYN > 0);
+                
+                C_index = length(sim_spec.connections);
+                
+                for con = 1:length(I)
+                    
+                    C_index = C_index + 1;
+                    
+                    if cluster_flag
+                        
+                        sim_spec.connections(C_index).direction = [pop_list{I(con)}, '->', pop_list{J(con)}];
+                        
+                    else
+                        
+                        sim_spec.connections(C_index).direction = [pop_list{J(con)}, '->', pop_list{I(con)}];
+                        
+                    end
+                    
+                    sim_spec.connections(C_index).mechanism_list = {'iSYN'};
+                    
+                    sim_spec.connections(C_index).parameters = {'gSYN', gSYN(I(con), J(con)),...
+                        'tauDx', tauDx(I(con), J(con)), 'tauRx', tauRx(I(con), J(con)),...
+                        'ESYN', -80, 'fanout', fanout(I(con), J(con))};
+                    
+                end
+            
+            end
+            
+        end
+        
+    end
+    
+    return
+    
+end
+
+%% In case single column.
 
 sim_spec = struct();
 
@@ -65,7 +171,7 @@ if ~isempty(excluded)
 
 end
 
-no_pops = length(pop_list);
+no_pops = length(pop_list); % pop_names = cellfun(@(x) [column_name, x], pop_list, 'UniformOutput', 0);
 
 param_list = {'gleak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'IappSTD', 'gExt', 'rate', 'frequency'};
 
@@ -77,6 +183,7 @@ conductance = conductance(:, included);
 
 for pop = 1:no_pops
 
+    sim_spec.populations(pop).name = [column_name, pop_list{pop}];
     sim_spec.populations(pop).equations = pop_list{pop};
     sim_spec.populations(pop).size = 20;
     
@@ -95,53 +202,55 @@ end
 
 mechanisms = {'iSYN', 'iNMDA', 'iGAP'};
 
-[fanout, gSYN] = get_connectivity(column, ach_flag);
+[fanout, gSYN, GJ, gNMDA, no_mechanisms, ESYN, tauRx, tauDx] = get_connectivity(column, ach_flag, pop_list, included);
 
-fanout = fanout(included, included);
-gSYN = gSYN(included, included);
-
-subcategories = {'FS', 'SI', 'sup', 'deep', 'IBaxon'};
-
-for s = 1:length(subcategories)
-    
-    eval([subcategories{s}, '_index = contains(pop_list, "', subcategories{s}, '");'])
-
-end
-
-E_index = ~(FS_index | SI_index);
-
-deepEtosupSI = double(deep_index & E_index)'*contains(pop_list, 'supSI');
-
-supEtosupI = double(sup_index & E_index)'*double(sup_index & (FS_index | SI_index));
-
-GJ = zeros(no_pops, no_pops);
-
-switch column
-    
-    case 'par'
-        
-        GJ = double(IBaxon_index)'*IBaxon_index;
-        gNMDA = FS_index*.01 + SI_index*.05;
-        
-    case 'a1_2015'
-        
-        gNMDA = (FS_index + SI_index)*.01;
-        
-    case 'a1_2013'
-        
-        gNMDA = FS_index*.04 + SI_index*.03;
-        
-end
-
-no_mechanisms = ones(no_pops, no_pops) + supEtosupI + GJ;
-
-ESYN = (FS_index + SI_index)*(-80);
-
-tauRx = repmat((E_index*.25 + (FS_index + SI_index)*.5), no_pops, 1);
-tauRX(logical(deepEtosupSI)) = 2.5;
-
-tauDx = repmat((E_index + FS_index*8 + SI_index*20), no_pops, 1);
-tauDx(logical(deepEtosupSI)) = 50;
+% [fanout, gSYN] = get_connectivity(column, ach_flag);
+% 
+% fanout = fanout(included, included);
+% gSYN = gSYN(included, included);
+% 
+% subcategories = {'FS', 'SI', 'sup', 'deep', 'IBaxon'};
+% 
+% for s = 1:length(subcategories)
+%     
+%     eval([subcategories{s}, '_index = contains(pop_list, "', subcategories{s}, '");'])
+% 
+% end
+% 
+% E_index = ~(FS_index | SI_index);
+% 
+% deepEtosupSI = double(deep_index & E_index)'*contains(pop_list, 'supSI');
+% 
+% supEtosupI = double(sup_index & E_index)'*double(sup_index & (FS_index | SI_index));
+% 
+% GJ = zeros(no_pops, no_pops);
+% 
+% switch column
+%     
+%     case 'par'
+%         
+%         GJ = double(IBaxon_index)'*IBaxon_index;
+%         gNMDA = FS_index*.01 + SI_index*.05;
+%         
+%     case 'a1_2015'
+%         
+%         gNMDA = (FS_index + SI_index)*.01;
+%         
+%     case 'a1_2013'
+%         
+%         gNMDA = FS_index*.04 + SI_index*.03;
+%         
+% end
+% 
+% no_mechanisms = ones(no_pops, no_pops) + supEtosupI + GJ;
+% 
+% ESYN = (FS_index + SI_index)*(-80);
+% 
+% tauRx = repmat((E_index*.25 + (FS_index + SI_index)*.5), no_pops, 1);
+% tauRX(logical(deepEtosupSI)) = 2.5;
+% 
+% tauDx = repmat((E_index + FS_index*8 + SI_index*20), no_pops, 1);
+% tauDx(logical(deepEtosupSI)) = 50;
 
 C_index = 0;
 
@@ -155,11 +264,11 @@ for p = 1:no_pops
             
             if cluster_flag
                 
-                sim_spec.connections(C_index).direction = [pop_list{p}, '->', pop_list{q}];
+                sim_spec.connections(C_index).direction = [column_name, pop_list{p}, '->', column_name, pop_list{q}];
                 
             else
                 
-                sim_spec.connections(C_index).direction = [pop_list{q}, '->', pop_list{p}];
+                sim_spec.connections(C_index).direction = [column_name, pop_list{q}, '->', column_name, pop_list{p}];
                 
             end
             
@@ -168,7 +277,7 @@ for p = 1:no_pops
             sim_spec.connections(C_index).parameters = {'gSYN', gSYN(p, q),...
                 'tauDx', tauDx(p, q), 'tauRx', tauRx(p, q),...
                 'ESYN', ESYN(p), 'fanout', fanout(p, q),...
-                'fanoutNMDA', 10, 'gNMDA', supEtosupI(p,q)*gNMDA(q),...
+                'fanoutNMDA', 10, 'gNMDA', gNMDA(p,q),... supEtosupI(p,q)*gNMDA(q),...
                 'fanoutGAP', 7, 'gGAP', .04*GJ(p,q)};
             
         end
@@ -183,9 +292,9 @@ for p = 1:length(multicomp_pops)
     
     for c = 1:(length(compartments) - 1)
         
-        pre_name = [pop_name, compartments{c}];
+        pre_name = [column_name, pop_name, compartments{c}];
         
-        post_name = [pop_name, compartments{c + 1}];
+        post_name = [column_name, pop_name, compartments{c + 1}];
         
         if sum(contains(excluded, pre_name)) + sum(contains(excluded, post_name)) < 1
         
@@ -274,7 +383,7 @@ end
 
 end
 
-function [fanout, gSYN] = get_connectivity(column, ach_flag)
+function [fanout, gSYN, GJ, gNMDA, no_mechanisms, ESYN, tauRx, tauDx] = get_connectivity(column, ach_flag, pop_list, included)
 
 switch column
     
@@ -378,5 +487,55 @@ for param = 1:length(params)
 end
 
 fanout = params{1}; gSYN = params{2};
+
+fanout = fanout(included, included);
+gSYN = gSYN(included, included);
+
+subcategories = {'FS', 'SI', 'sup', 'deep', 'IBaxon'};
+
+for s = 1:length(subcategories)
+    
+    eval([subcategories{s}, '_index = contains(pop_list, "', subcategories{s}, '");'])
+
+end
+
+E_index = ~(FS_index | SI_index);
+
+deepEtosupSI = double(deep_index & E_index)'*contains(pop_list, 'supSI');
+
+supEtosupI = double(sup_index & E_index)'*double(sup_index & (FS_index | SI_index));
+
+no_pops = length(pop_list);
+
+GJ = zeros(no_pops, no_pops);
+
+switch column
+    
+    case 'par'
+        
+        GJ = double(IBaxon_index)'*IBaxon_index;
+        gNMDA = FS_index*.01 + SI_index*.05;
+        
+    case 'a1_2015'
+        
+        gNMDA = (FS_index + SI_index)*.01;
+        
+    case 'a1_2013'
+        
+        gNMDA = FS_index*.04 + SI_index*.03;
+        
+end
+
+gNMDA = supEtosupI*diag(gNMDA);
+
+no_mechanisms = ones(no_pops, no_pops) + supEtosupI + GJ;
+
+ESYN = (FS_index + SI_index)*(-80);
+
+tauRx = repmat((E_index*.25 + (FS_index + SI_index)*.5), no_pops, 1);
+tauRX(logical(deepEtosupSI)) = 2.5;
+
+tauDx = repmat((E_index + FS_index*8 + SI_index*20), no_pops, 1);
+tauDx(logical(deepEtosupSI)) = 50;
 
 end
