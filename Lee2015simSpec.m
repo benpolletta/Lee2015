@@ -67,7 +67,7 @@ end
 
 no_pops = length(pop_list);
 
-param_list = {'gleak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'gExt', 'rate'};
+param_list = {'gleak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'IappSTD', 'gExt', 'rate', 'frequency'};
 
 no_params = length(param_list);
 
@@ -225,7 +225,8 @@ switch column
             0, 0, -1, -1, 2, 2, 1, 1, 2, 1, 1, 0, -1;... % Iapp
             0.5*ones(1,3), 0, .5, .3, .1, .1, .3, .1, .1, .5, .8;... % IappSTD
             .2, .02, 0, 1, .03, 3, 0, 0, 3, zeros(1, 4);... % g_ext
-            50, 50, 0, 100, 100, zeros(1,8)];... % rate
+            50, 50, 0, 100, 100, 250, 0, 0, 250, zeros(1,4);... % rate
+            zeros(1,5), 20, 0, 0, 20, zeros(1, 4)];... % frequency 
         
     case 'a1_2015'
         

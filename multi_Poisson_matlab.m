@@ -1,6 +1,8 @@
-function psps = multi_Poisson_matlab(no_cells, inputs_per_cell, rate, tau_1, tau_d, T, dt)
+function psps = multi_Poisson_matlab(no_cells, inputs_per_cell, rate, frequency, power, tau_1, tau_d, T, dt)
 
 t = 0:dt:T;
+rhythm = ((cos(2*pi*frequency.*t/1000)+1)/2).^power;
+rate = rate*rhythm';
 
 % EPSP for spikes at time t = 0.
 psp = exp(-max(t - tau_1, 0)/tau_d); % tau_i*(exp(-max(t - tau_1, 0)/tau_d) - exp(-max(t - tau_1, 0)/tau_r)); %/(tau_d - tau_r);
