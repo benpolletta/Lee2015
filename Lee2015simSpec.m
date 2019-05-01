@@ -66,15 +66,15 @@ if iscell(column_name)
         
         for c = 1:length(column_name)
             
-            eval(['deepE_index = deepIBaxon_index | deepRSaxon_index & ', column_name{c}, '_index;'])
+            eval(['deepE_index = (deepIBaxon_index | deepRSaxon_index) & ', column_name{c}, '_index;'])
             
-            for d = 1:length(column_name)
+            for d = [1:(c - 1) (c + 1):length(column_name)]
                 
-                eval(['supFS_index = supFS_index & ', column_name{d}, '_index;'])
-                eval(['supSI_index = supSI_index & ', column_name{d}, '_index;'])
+                eval(['column_supFS_index = supFS_index & ', column_name{d}, '_index;'])
+                eval(['column_supSI_index = supSI_index & ', column_name{d}, '_index;'])
                 
-                deepEtosupFS = double(deepE_index)'*double(supFS_index);
-                deepEtosupSI = double(deepE_index)'*double(supSI_index);
+                deepEtosupFS = double(deepE_index)'*double(column_supFS_index);
+                deepEtosupSI = double(deepE_index)'*double(column_supSI_index);
                 
                 fanout = 2*(deepEtosupFS + deepEtosupSI);
                 gSYN = .2*deepEtosupFS + .3*deepEtosupSI;
@@ -89,21 +89,21 @@ if iscell(column_name)
                     
                     C_index = C_index + 1;
                     
-                    if cluster_flag
-                        
-                        sim_spec.connections(C_index).direction = [pop_list{I(con)}, '->', pop_list{J(con)}];
-                        
-                    else
-                        
-                        sim_spec.connections(C_index).direction = [pop_list{J(con)}, '->', pop_list{I(con)}];
-                        
-                    end
+                    %                     if cluster_flag
+                    
+                    sim_spec.connections(C_index).direction = [pop_list{I(con)}, '->', pop_list{J(con)}];
+                    
+                    %                     else
+                    %
+                    %                         sim_spec.connections(C_index).direction = [pop_list{J(con)}, '->', pop_list{I(con)}];
+                    %
+                    %                     end
                     
                     sim_spec.connections(C_index).mechanism_list = {'iSYN'};
                     
                     sim_spec.connections(C_index).parameters = {'gSYN', gSYN(I(con), J(con)),...
                         'tauDx', tauDx(I(con), J(con)), 'tauRx', tauRx(I(con), J(con)),...
-                        'ESYN', -80, 'fanout', fanout(I(con), J(con))};
+                        'ESYN', 0, 'fanout', fanout(I(con), J(con))};
                     
                 end
             
@@ -262,15 +262,15 @@ for p = 1:no_pops
             
             C_index = C_index + 1;
             
-            if cluster_flag
-                
-                sim_spec.connections(C_index).direction = [column_name, pop_list{p}, '->', column_name, pop_list{q}];
-                
-            else
-                
-                sim_spec.connections(C_index).direction = [column_name, pop_list{q}, '->', column_name, pop_list{p}];
-                
-            end
+            %             if cluster_flag
+            
+            sim_spec.connections(C_index).direction = [column_name, pop_list{p}, '->', column_name, pop_list{q}];
+            
+            %             else
+            %
+            %                 sim_spec.connections(C_index).direction = [column_name, pop_list{q}, '->', column_name, pop_list{p}];
+            %
+            %             end
             
             sim_spec.connections(C_index).mechanism_list = mechanisms(1:no_mechanisms(p,q));
             
@@ -300,15 +300,15 @@ for p = 1:length(multicomp_pops)
         
             C_index = C_index + 1;
             
-            if cluster_flag
-                
-                sim_spec.connections(C_index).direction = [pre_name, '->', post_name];
-                
-            else
-                
-                sim_spec.connections(C_index).direction = [post_name, '->', pre_name];
-                
-            end
+            %             if cluster_flag
+            
+            sim_spec.connections(C_index).direction = [pre_name, '->', post_name];
+            
+            %             else
+            %
+            %                 sim_spec.connections(C_index).direction = [post_name, '->', pre_name];
+            %
+            %             end
             
             sim_spec.connections(C_index).mechanism_list = {'iCOM'};
             
