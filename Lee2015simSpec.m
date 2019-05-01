@@ -238,15 +238,21 @@ for p = 1:no_pops
     
 end
 
+coupling = [0, 0.4, 0;... from dendrite
+    0.2, 0, 0.3;... from soma
+    0, 0.3, 0]; % from axon
+
+[I,J] = find(coupling > 0);
+
 for p = 1:length(multicomp_pops)
     
     pop_name = multicomp_pops{p};
     
-    for c = 1:(length(compartments) - 1)
+    for c = 1:length(I)
         
-        pre_name = [column_name, pop_name, compartments{c}];
+        pre_name = [column_name, pop_name, compartments{I(c)}];
         
-        post_name = [column_name, pop_name, compartments{c + 1}];
+        post_name = [column_name, pop_name, compartments{J(c)}];
         
         if sum(contains(excluded, pre_name)) + sum(contains(excluded, post_name)) < 1
         
@@ -263,6 +269,8 @@ for p = 1:length(multicomp_pops)
             %             end
             
             sim_spec.connections(C_index).mechanism_list = {'iCOM'};
+            
+            sim_spec.connections(C_index).parameters = {'gCOM', coupling(I(c),J(c))};
             
         end
         
