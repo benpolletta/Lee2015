@@ -204,54 +204,6 @@ mechanisms = {'iSYN', 'iNMDA', 'iGAP'};
 
 [fanout, gSYN, GJ, gNMDA, no_mechanisms, ESYN, tauRx, tauDx] = get_connectivity(column, ach_flag, pop_list, included);
 
-% [fanout, gSYN] = get_connectivity(column, ach_flag);
-% 
-% fanout = fanout(included, included);
-% gSYN = gSYN(included, included);
-% 
-% subcategories = {'FS', 'SI', 'sup', 'deep', 'IBaxon'};
-% 
-% for s = 1:length(subcategories)
-%     
-%     eval([subcategories{s}, '_index = contains(pop_list, "', subcategories{s}, '");'])
-% 
-% end
-% 
-% E_index = ~(FS_index | SI_index);
-% 
-% deepEtosupSI = double(deep_index & E_index)'*contains(pop_list, 'supSI');
-% 
-% supEtosupI = double(sup_index & E_index)'*double(sup_index & (FS_index | SI_index));
-% 
-% GJ = zeros(no_pops, no_pops);
-% 
-% switch column
-%     
-%     case 'par'
-%         
-%         GJ = double(IBaxon_index)'*IBaxon_index;
-%         gNMDA = FS_index*.01 + SI_index*.05;
-%         
-%     case 'a1_2015'
-%         
-%         gNMDA = (FS_index + SI_index)*.01;
-%         
-%     case 'a1_2013'
-%         
-%         gNMDA = FS_index*.04 + SI_index*.03;
-%         
-% end
-% 
-% no_mechanisms = ones(no_pops, no_pops) + supEtosupI + GJ;
-% 
-% ESYN = (FS_index + SI_index)*(-80);
-% 
-% tauRx = repmat((E_index*.25 + (FS_index + SI_index)*.5), no_pops, 1);
-% tauRX(logical(deepEtosupSI)) = 2.5;
-% 
-% tauDx = repmat((E_index + FS_index*8 + SI_index*20), no_pops, 1);
-% tauDx(logical(deepEtosupSI)) = 50;
-
 C_index = 0;
 
 for p = 1:no_pops
