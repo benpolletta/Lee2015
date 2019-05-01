@@ -2,7 +2,7 @@
 
 Iapp = -6
 IappSTD = .1
-ton = 500
+ton = 0
 toff = T(end)
 
 gTonic = Iapp+randn(1,Npop)*IappSTD;
