@@ -17,7 +17,7 @@ fanout = inf
 mask = makeSYNmask(Npre, Npost, fanout)
 
 gsyn=unifrnd(gSYN-.01,gSYN+.01,[1 Npost])
-ISYN(V,sSYNpre) = gsyn.*(sSYNpre*mask).*(V-ESYN)
+ISYN(Vpost,sSYNpre) = gsyn.*(sSYNpre*mask).*(Vpost-ESYN)
 %ISYN(V,s) = gsyn.*(s*netcon).*(X-EAMPA)
 
 sSYNpre' = -sSYNpre./tauDx + ((1-sSYNpre)/tauRx).*(1+tanh(Vpre/10));
