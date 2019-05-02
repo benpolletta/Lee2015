@@ -7,7 +7,7 @@ toff = T(end)
 
 gTonic = Iapp+randn(1,Npop)*IappSTD;
 
-ITonic(t)=gTonic.*((t/ton)*(t<=ton)+(ton<t&t<toff));
+ITonic(t)=gTonic.*(ton<t&t<toff); % ((t/ton)*(t<=ton)+ )
 
 % Linkers
 @current += -ITonic(t)
