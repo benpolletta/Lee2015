@@ -1,4 +1,4 @@
-function [sim_spec, label] = Lee2015simSpec(column, ach_flag, cluster_flag, excluded, column_name)
+function [sim_spec, label] = Lee2015simSpec(column, ach_flag, excluded, column_name)
 % INPUTS:
 % column (string or cell of strings): one of 'par', 'a1_2015', 'a1_2013'.
 % ach_flag (Boolean or vector of Booleans): determines whether conductances & connectivity 
@@ -89,15 +89,7 @@ if iscell(column_name)
                     
                     C_index = C_index + 1;
                     
-                    %                     if cluster_flag
-                    
                     sim_spec.connections(C_index).direction = [pop_list{I(con)}, '->', pop_list{J(con)}];
-                    
-                    %                     else
-                    %
-                    %                         sim_spec.connections(C_index).direction = [pop_list{J(con)}, '->', pop_list{I(con)}];
-                    %
-                    %                     end
                     
                     sim_spec.connections(C_index).mechanism_list = {'iSYN'};
                     
@@ -214,15 +206,7 @@ for p = 1:no_pops
             
             C_index = C_index + 1;
             
-            %             if cluster_flag
-            
             sim_spec.connections(C_index).direction = [column_name, pop_list{p}, '->', column_name, pop_list{q}];
-            
-            %             else
-            %
-            %                 sim_spec.connections(C_index).direction = [column_name, pop_list{q}, '->', column_name, pop_list{p}];
-            %
-            %             end
             
             sim_spec.connections(C_index).mechanism_list = mechanisms(1:no_mechanisms(p,q));
             
@@ -258,15 +242,7 @@ for p = 1:length(multicomp_pops)
         
             C_index = C_index + 1;
             
-            %             if cluster_flag
-            
             sim_spec.connections(C_index).direction = [pre_name, '->', post_name];
-            
-            %             else
-            %
-            %                 sim_spec.connections(C_index).direction = [post_name, '->', pre_name];
-            %
-            %             end
             
             sim_spec.connections(C_index).mechanism_list = {'iCOM'};
             
@@ -352,7 +328,7 @@ switch column
         fanout = [5, 10, 10, 0, 0, 20, 20, 0, 0;... % from supRS
             5, 8, 5, 5, 0, 0, 0, 0, 0;... % from supFS
             5, 5, 0, 0, 0, 0, 0, 0, 0;... % from supSI
-            5, 0, 0, 10, 10, 10, 10, 20, 0;... % from L4RS
+            5, 5, 0, 10, 10, 10, 10, 20, 0;... % from L4RS
             5, 0, 0, 10, 10, 0, 0, 0, 0;... % from L4FS
             0, 2, 2, 0, 0, 10, 10, 10, 10;... % from deepIB
             0, 2, 2, 0, 0, 10, 10, 10, 10;... % from deepRS
@@ -362,7 +338,7 @@ switch column
         gSYN = [.22, .3, .03, 0, 0, .212, .212, 0, 0;... % from supRS
             .4, .6, .1, .4, 0, 0, 0, 0, 0;... % from supFS
             .1, .2, 0, 0, 0, 0, 0, 0, 0;... % from supSI
-            .2, 0, 0, .4, .2, .212, .212, .3, 0;... % from L4RS
+            .2, .2, 0, .4, .2, .212, .212, .3, 0;... % from L4RS
             .02, 0, 0, 1, .3, 0, 0, 0, 0;... % from L4FS
             0, .2, .2, 0, 0, .02, .02, .12, .12;... % from deepIB
             0, .2, .2, 0, 0, .02, .02, .05, .15;... % from deepRS
@@ -482,6 +458,7 @@ switch column
         
     case 'a1_2013'
         
+        GJ = double(IBaxon_index)'*IBaxon_index;
         gNMDA = FS_index*.04 + SI_index*.03;
         
 end
