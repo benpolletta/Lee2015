@@ -1,4 +1,4 @@
-function [sim_spec, label] = Lee2015simSpec(column, ach_flag, excluded, column_name)
+function [sim_spec, label] = Lee2015simSpec(column, ach_flag, bottom_up_flag, top_down_flag, excluded, column_name)
 % INPUTS:
 % column (string or cell of strings): one of 'par', 'a1_2015', 'a1_2013'.
 % ach_flag (Boolean or vector of Booleans): determines whether conductances & connectivity 
@@ -11,8 +11,10 @@ if nargin < 1, column = ''; end
 if isempty(column), column = 'par'; end
 if nargin < 2, ach_flag = []; end
 if isempty(ach_flag), ach_flag = 0; end
-if nargin < 3, cluster_flag = []; end
-if isempty(cluster_flag), cluster_flag = 0; end
+if nargin < 3, bottom_up_flag = []; end
+if isempty(bottom_up_flag), bottom_up_flag = 0; end
+if nargin < 3, top_down_flag = []; end
+if isempty(top_down_flag), top_down_flag = 0; end
 if nargin < 4, excluded = {}; end
 if nargin < 5, column_name = ''; end
 
@@ -36,8 +38,12 @@ if iscell(column_name)
         end
        
         ach_index = min(length(ach_flag), c);
+        top_down_index = min(length(top_down_flag), c);
+        bottom_up_index = min(length(bottom_up_flag), c);
        
-        [column_sim_spec, label] = Lee2015simSpec(column_type, ach_flag(ach_index), cluster_flag, excluded, column_name{c});
+        [column_sim_spec, label] = Lee2015simSpec(column_type, ach_flag(ach_index),...
+            bottom_up_flag(bottom_up_index), top_down_flag(top_down_index),...
+            excluded, column_name{c});
         
         if isfield(sim_spec, 'populations')
         
@@ -169,7 +175,7 @@ param_list = {'gLeak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'IappSTD', 'gExt', '
 
 no_params = length(param_list);
 
-conductance = get_conductance(column, ach_flag);
+conductance = get_conductance(column, ach_flag, bottom_up_flag, top_down_flag);
 
 conductance = conductance(:, included);
 
@@ -256,7 +262,7 @@ end
 
 end
 
-function conductance = get_conductance(column, ach_flag)
+function conductance = get_conductance(column, ach_flag, bottom_up_flag, top_down_flag)
 
 switch column
     
@@ -269,9 +275,24 @@ switch column
             zeros(1, 13);... % g_h
             0, 0, -1, -1, 2, 2, 1, 1, 2, 1, 1, 0, -1;... % Iapp
             0.5*ones(1,3), 0, .5, .3, .1, .1, .3, .1, .1, .5, .8;... % IappSTD
-            .2, .02, 0, 1, .03, 3, 0, 0, 3, zeros(1, 4);... % g_ext
-            50, 50, 0, 100, 100, 250, 0, 0, 250, zeros(1,4);... % rate
-            zeros(1,5), 20, 0, 0, 20, zeros(1, 4)];... % frequency 
+            .2, .02, zeros(1, 11);... % g_ext % 0, 1, .03, 3, 0, 0, 3, zeros(1,4);...
+            50, 50, zeros(1, 11);... % rate % 0, 100, 100, 250, 0, 0, 250, zeros(1,4);... 
+            zeros(1, 13)];... % frequency
+            
+        if bottom_up_flag
+           
+            conductance(end - 2, [4 5]) = [1 .03];
+            conductance(end - 1, [4 5]) = 100;
+            
+        end
+        
+        if top_down_flag
+           
+            conductance(end - 2, [6 9]) = 3;
+            conductance(end - 1, [6 9]) = 250;
+            conductance(end, [6 9]) = 20;
+            
+        end
         
     case 'a1_2015'
         

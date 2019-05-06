@@ -20,7 +20,7 @@ mkdir(savepath);
 
 unpack_sim_struct
 
-[sim_spec, sim_label] = Lee2015simSpec(column, ach_flag, cluster_flag, excluded, column_name);
+[sim_spec, sim_label] = Lee2015simSpec(column, ach_flag, bottom_up_flag, top_down_flag, excluded, column_name);
 
 Now = clock;
 name = sprintf('%s_%g_%g_%.4g', sim_label, Now(4), Now(5), Now(6));
