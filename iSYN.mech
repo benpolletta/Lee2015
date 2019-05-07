@@ -1,4 +1,5 @@
 gSYN = [0.045]
+gSYNnoise = [0]
 ESYN = [0]
 tauDx = [1]
 tauRx = [0.25]
@@ -16,11 +17,11 @@ fanout = inf
 % mask = Xpre-Xpost >= 0 & Xpre-Xpost < fanout | Xpre-Xpost < 0 & UB-(Xpost-Xpre) < fanout
 mask = makeSYNmask(Npre, Npost, fanout)
 
-gsyn=unifrnd(gSYN-.01,gSYN+.01,[1 Npost])
+gsyn=unifrnd(gSYN-gSYNnoise,gSYN+gSYNnoise,[1 Npost])
 ISYN(Vpost,sSYNpre) = gsyn.*(sSYNpre*mask).*(Vpost-ESYN)
 %ISYN(V,s) = gsyn.*(s*netcon).*(X-EAMPA)
 
-sSYNpre' = -sSYNpre./tauDx + ((1-sSYNpre)/tauRx).*(1+tanh(Vpre/10));
+sSYNpre' = -sSYNpre./tauDx + ((1-sSYNpre)/tauRx).*(1+tanh(Vpre/10))/2;
 sSYNpre(0) = IC+IC_noise.*rand(Npre,1)
 
 @current += -ISYN(Vpost,sSYNpre)

@@ -6,11 +6,11 @@ frequency=0; % rhythm of inputs
 power=7;
 Tend=T(end); 	% ms, duration
 tauD=2; 	% ms, exponential decay time constant
-Pmax=1; 	% conductance step on spike
+tau1=0; 	% ms, delay of spike time
 gExt=1;		% input strength
 EExt=0;
 
-p = multi_Poisson_matlab(Npop, 1, rate, frequency, power, Pmax, tauD, Tend, dt)
+p = multi_Poisson_matlab(Npop, 1, rate, frequency, power, tau1, tauD, Tend, dt)
 
 psps(t) = gExt.*p(:, max(1,round(t/dt)))';
 Itrain(t,V) = psps(t).*(V-EExt);

@@ -8,8 +8,8 @@ IC = [0]
 IC_noise = [0.01]
  
 minf(X) = 1./(1+exp((-X-KDR_V1)/KDR_d1))
-mtau(X) = .25+4.35*exp(-abs(X+KDR_V2)/KDR_d2)
-aM(X) = minf(X) ./ mtau(X)
+mtau(X) = .25+4.35.*exp(-abs(X+KDR_V2)./KDR_d2)
+aM(X) = minf(X)./ mtau(X)
 bM(X) = (1-minf(X))./mtau(X)
 IKDR(X,mKDR) = gKDR.*mKDR.^4.*(X-E_KDR)
  
