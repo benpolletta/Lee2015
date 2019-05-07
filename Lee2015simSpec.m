@@ -18,6 +18,19 @@ if isempty(top_down_flag), top_down_flag = 0; end
 if nargin < 4, excluded = {}; end
 if nargin < 5, column_name = ''; end
 
+label = '';
+if iscell(column)
+    for c = 1:length(column), label = [label, column{c}]; end
+else
+    label = column;
+end
+label = [label, '_ach'];
+for a = 1:length(ach_flag), label = [label, num2str(ach_flag(a), '%d')]; end
+label = [label, '_td'];
+for a = 1:length(top_down_flag), label = [label, num2str(top_down_flag(a), '%d')]; end
+label = [label, '_bu'];
+for a = 1:length(bottom_up_flag), label = [label, num2str(bottom_up_flag(a), '%d')]; end
+
 %% In case more than one column.
 
 if iscell(column_name)
@@ -41,9 +54,11 @@ if iscell(column_name)
         top_down_index = min(length(top_down_flag), c);
         bottom_up_index = min(length(bottom_up_flag), c);
        
-        [column_sim_spec, label] = Lee2015simSpec(column_type, ach_flag(ach_index),...
+        [column_sim_spec, ex_label] = Lee2015simSpec(column_type, ach_flag(ach_index),...
             bottom_up_flag(bottom_up_index), top_down_flag(top_down_index),...
             excluded, column_name{c});
+        
+        label = [label, ex_label];
         
         if isfield(sim_spec, 'populations')
         
@@ -149,7 +164,7 @@ pop_list(~included) = [];
 multicomp_pops(~mc_pops_included) = [];
 compartments(~comps_included) = [];
 
-label = sprintf('%s_ach%d', column, ach_flag);
+label = ''; % sprintf('%s_ach%d_td%d_bu%d', column, ach_flag, top_down_flag, bottom_up_flag);
 
 if ~isempty(excluded)
     
@@ -219,8 +234,25 @@ for p = 1:no_pops
             sim_spec.connections(C_index).parameters = {'gSYN', gSYN(p, q),...
                 'tauDx', tauDx(p, q), 'tauRx', tauRx(p, q),...
                 'ESYN', ESYN(p), 'fanout', fanout(p, q),...
-                'fanoutNMDA', 10, 'gNMDA', gNMDA(p,q),... supEtosupI(p,q)*gNMDA(q),...
-                'fanoutGAP', 7, 'gGAP', .04*GJ(p,q)};
+                'fanoutNMDA', 10, 'gNMDA', gNMDA(p,q)}; % supEtosupI(p,q)*gNMDA(q),...
+            
+            if GJ(p, q) > 0
+                
+                sim_spec.connections(C_index).mechanism_list = [sim_spec.connections(C_index).mechanism_list {'iGAP'}];
+                
+                sim_spec.connections(C_index).parameters = [sim_spec.connections(C_index).parameters {'fanoutGAP', 7, 'gGAP', GJ(p,q)}];
+                
+            end
+            
+        elseif GJ(p, q) > 0
+            
+            C_index = C_index + 1;
+            
+            sim_spec.connections(C_index).direction = [column_name, pop_list{p}, '->', column_name, pop_list{q}];
+            
+            sim_spec.connections(C_index).mechanism_list = {'iGAP'};
+            
+            sim_spec.connections(C_index).parameters = {'fanoutGAP', 7, 'gGAP', GJ(p,q)};
             
         end
 
@@ -347,9 +379,9 @@ switch column
     case 'a1_2013'
         
         fanout = [5, 10, 10, 0, 0, 20, 20, 0, 0;... % from supRS
-            5, 8, 5, 5, 0, 0, 0, 0, 0;... % from supFS
+            5, 8, 5, 0, 0, 0, 0, 0, 0;... % from supFS
             5, 5, 0, 0, 0, 0, 0, 0, 0;... % from supSI
-            5, 5, 0, 10, 10, 10, 10, 20, 0;... % from L4RS
+            5, 0, 0, 10, 10, 10, 10, 20, 0;... % from L4RS
             5, 0, 0, 10, 10, 0, 0, 0, 0;... % from L4FS
             0, 2, 2, 0, 0, 10, 10, 10, 10;... % from deepIB
             0, 2, 2, 0, 0, 10, 10, 10, 10;... % from deepRS
@@ -357,9 +389,9 @@ switch column
             0, 0, 0, 0, 10, 20, 10, 10, 20]; % from deepSI
         
         gSYN = [.22, .3, .03, 0, 0, .212, .212, 0, 0;... % from supRS
-            .4, .6, .1, .4, 0, 0, 0, 0, 0;... % from supFS
+            .4, .6, .1, 0, 0, 0, 0, 0, 0;... % from supFS
             .1, .2, 0, 0, 0, 0, 0, 0, 0;... % from supSI
-            .2, .2, 0, .4, .2, .212, .212, .3, 0;... % from L4RS
+            .2, 0, 0, .4, .2, .212, .212, .3, 0;... % from L4RS
             .02, 0, 0, 1, .3, 0, 0, 0, 0;... % from L4FS
             0, .2, .2, 0, 0, .02, .02, .12, .12;... % from deepIB
             0, .2, .2, 0, 0, .02, .02, .05, .15;... % from deepRS
@@ -448,7 +480,7 @@ fanout = params{1}; gSYN = params{2};
 fanout = fanout(included, included);
 gSYN = gSYN(included, included);
 
-subcategories = {'FS', 'SI', 'sup', 'deep', 'IBaxon'};
+subcategories = {'FS', 'SI', 'sup', 'deep', 'IBaxon', 'RSaxon'};
 
 for s = 1:length(subcategories)
     
@@ -470,7 +502,7 @@ switch column
     
     case 'par'
         
-        GJ = double(IBaxon_index)'*IBaxon_index;
+        GJ = .04*double(IBaxon_index)'*IBaxon_index;
         gNMDA = FS_index*.01 + SI_index*.05;
         
     case 'a1_2015'
@@ -479,21 +511,21 @@ switch column
         
     case 'a1_2013'
         
-        GJ = double(IBaxon_index)'*IBaxon_index;
+        GJ = .002*double(IBaxon_index)'*IBaxon_index + .002*double(RSaxon_index)'*RSaxon_index;
         gNMDA = FS_index*.04 + SI_index*.03;
         
 end
 
 gNMDA = supEtosupI*diag(gNMDA);
 
-no_mechanisms = ones(no_pops, no_pops) + supEtosupI + GJ;
+no_mechanisms = ones(no_pops, no_pops) + double(supEtosupI > 0); %  + double(GJ > 0);
 
 ESYN = (FS_index + SI_index)*(-80);
 
-tauRx = repmat((E_index*.25 + (FS_index + SI_index)*.5), no_pops, 1);
-tauRX(logical(deepEtosupSI)) = 2.5;
+tauRx = repmat((E_index*.25 + (FS_index + SI_index)*.5)', 1, no_pops);
+tauRx(logical(deepEtosupSI)) = 2.5;
 
-tauDx = repmat((E_index + FS_index*8 + SI_index*20), no_pops, 1);
+tauDx = repmat((E_index + FS_index*8 + SI_index*20)', 1, no_pops);
 tauDx(logical(deepEtosupSI)) = 50;
 
 end
