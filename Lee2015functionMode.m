@@ -76,19 +76,75 @@ else
     
 end
 
-dsPlot(data)
-
-saveas(gcf, fullfile(savepath, [name, '.fig']))
-
-save_as_pdf(gcf, fullfile(savepath, name))
-
-dsPlot(data, 'plot_type', 'rastergram')
-
-saveas(gcf, fullfile(savepath, [name, '_raster.fig']))
-
-save_as_pdf(gcf, fullfile(savepath, [name, '_raster']))
+plotdata(data, column_name, savepath, name)
 
 cd (start_dir)
+
+end
+
+function plotdata(data, column_name, savepath, name)
+
+if iscell(column_name) && length(column_name) > 1
+    
+    no_columns = length(column_name);
+    
+elseif isstr(column_name)
+    
+    column_name = {column_name};
+    
+    no_columns = 1;
+    
+end
+
+no_sims = length(data);
+
+for s = 1:no_sims
+    
+    fig1 = figure;
+    
+    for c = 1:no_columns
+        
+        axis = subplot(1, no_columns, c);
+        
+        if c == 1
+            
+            dsPlot(data(s), 'variable', [column_name{c}, '*V'], 'lock_gca', 1)
+            
+        else
+            
+            dsPlot(data(s), 'variable', [column_name{c}, '*V'], 'lock_gca', 1, 'suppress_textstring', 1)
+            
+        end
+        
+    end
+    
+    saveas(fig1, fullfile(savepath, [name, '_fig', num2str(s), '.fig']))
+    
+    save_as_pdf(fig1, fullfile(savepath, [name, '_fig', num2str(s)]))
+    
+    fig2 = figure;
+    
+    for c = 1:no_columns
+        
+        axis = subplot(1, no_columns, c);
+        
+        if c == 1
+        
+            dsPlot(data(s), 'variable', [column_name{c}, '*V'], 'lock_gca', 1, 'plot_type', 'rastergram')
+            
+        else
+        
+            dsPlot(data(s), 'variable', [column_name{c}, '*V'], 'lock_gca', 1, 'plot_type', 'rastergram', 'suppress_textstring', 1)
+            
+        end
+        
+    end
+    
+    saveas(fig2, fullfile(savepath, [name, '_fig', num2str(s), '_raster.fig']))
+    
+    save_as_pdf(fig2, fullfile(savepath, [name, '_fig', num2str(s), '_raster']))
+    
+end
 
 end
 
