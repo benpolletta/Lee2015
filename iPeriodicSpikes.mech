@@ -8,7 +8,7 @@ tau_1 = 0; % rise time, in ms
 Sfreq = 20; % in Hz
 Sshift = 0; % in ms
 inputs_per_cell = 1;
-jitter = 1000/Sfreq*.05; % in ms
+jitter = 0; % 1000/Sfreq*.05; % in ms
 
 % Time series properties
 Tend = T(end); 	    % ms, max simulation duration
@@ -16,10 +16,10 @@ dt = 0.01;        % ms, time step duration
 Sonset = 0;    % ms, onset time
 Soffset = Inf;   % ms, offset time
 
-psp = rhythmic_spike(tau_d,tau_r,Sfreq,Sshift,Tend,dt,Sonset,Soffset,Npop,inputs_per_cell,jitter)
+psp = rhythmic_spike(tau_d,tau_1,Sfreq,Sshift,Tend,dt,Sonset,Soffset,Npop,inputs_per_cell,jitter)
 
 % Functions
 input(X) = psp(k,:)
-Ispike(X) = gSpike*input(X)*(X-Esyn)
+Ispike(X) = gSpike.*input(X).*(X-Esyn)
 
 @current += -Ispike(X)
