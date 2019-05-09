@@ -186,7 +186,7 @@ end
 
 no_pops = length(pop_list); % pop_names = cellfun(@(x) [column_name, x], pop_list, 'UniformOutput', 0);
 
-param_list = {'gLeak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'IappSTD', 'gExt', 'rate', 'frequency'};
+param_list = {'gLeak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'IappSTD', 'gExt', 'rate', 'gSpike', 'Sfreq'};
 
 no_params = length(param_list);
 
@@ -305,23 +305,23 @@ switch column
             zeros(1, 5), 4, 0, 0, 1.6, zeros(1, 4);... % g_CaH
             zeros(1, 13);... % g_CaL
             zeros(1, 13);... % g_h
-            0, 0, -1, -1, 2, 2, 1, 1, 2, 1, 1, 0, -1;... % Iapp
+            0, 0, -1, 1, -2, 2, 1, 1, 4, 3, 3, -4, -1;... % Iapp 0, 0, -1, -1, 2, 2, 1, 1, 2, 1, 1, 0, -1;... 
             0.5*ones(1,3), 0, .5, .3, .1, .1, .3, .1, .1, .5, .8;... % IappSTD
-            .2, .02, zeros(1, 11);... % g_ext % 0, 1, .03, 3, 0, 0, 3, zeros(1,4);...
+            .2, .02, zeros(1, 11);... % gExt % 0, 1, .03, 3, 0, 0, 3, zeros(1,4);...
             50, 50, zeros(1, 11);... % rate % 0, 100, 100, 250, 0, 0, 250, zeros(1,4);... 
-            zeros(1, 13)];... % frequency
+            zeros(1, 13);... % gSpike
+            zeros(1, 13)];... % Sfreq
             
         if bottom_up_flag
            
-            conductance(end - 2, [4 5]) = [1 .03];
-            conductance(end - 1, [4 5]) = 100;
+            conductance(end - 3, [4 5]) = [1 .03];
+            conductance(end - 2, [4 5]) = 100;
             
         end
         
         if top_down_flag
            
-            conductance(end - 2, [6 9]) = 3;
-            conductance(end - 1, [6 9]) = 250;
+            conductance(end - 1, [6 9]) = 3;
             conductance(end, [6 9]) = 20;
             
         end
