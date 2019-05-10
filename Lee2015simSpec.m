@@ -1,6 +1,6 @@
 function [sim_spec, label] = Lee2015simSpec(column, ach_flag, bottom_up_flag, top_down_flag, excluded, column_name)
 % INPUTS:
-% column (string or cell of strings): one of 'par', 'a1_2015', 'a1_2013'.
+% column (string or cell of strings): one of 'par_2015', 'a1_2015', 'a1_2013'.
 % ach_flag (Boolean or vector of Booleans): determines whether conductances & connectivity 
 %   reflect high or low cholinergic tone.
 % excluded (1D cell of strings): populations to be left out of simulation.
@@ -8,7 +8,7 @@ function [sim_spec, label] = Lee2015simSpec(column, ach_flag, bottom_up_flag, to
 %   population names, in case of multiple columns.
 
 if nargin < 1, column = ''; end
-if isempty(column), column = 'par'; end
+if isempty(column), column = 'par_2015'; end
 if nargin < 2, ach_flag = []; end
 if isempty(ach_flag), ach_flag = 0; end
 if nargin < 3, bottom_up_flag = []; end
@@ -294,6 +294,8 @@ end
 
 end
 
+%% Getting conductances.
+
 function conductance = get_conductance(column, ach_flag, bottom_up_flag, top_down_flag)
 
 switch column
@@ -306,7 +308,7 @@ switch column
             zeros(1, 13);... % g_CaL
             zeros(1, 13);... % g_h
             0, 0, -1, 1, -2, 2, 1, 1, 4, 3, 3, -4, -1;... % Iapp 0, 0, -1, -1, 2, 2, 1, 1, 2, 1, 1, 0, -1;... 
-            0.5*ones(1,3), 0, .5, .3, .1, .1, .3, .1, .1, .5, .8;... % IappSTD
+            zeros(1,13);... 0.5*ones(1,3), 0, .5, .3, .1, .1, .3, .1, .1, .5, .8;... % IappSTD
             .2, .02, zeros(1, 11);... % gExt % 0, 1, .03, 3, 0, 0, 3, zeros(1,4);...
             50, 50, zeros(1, 11);... % rate % 0, 100, 100, 250, 0, 0, 250, zeros(1,4);... 
             zeros(1, 13);... % gSpike
@@ -347,7 +349,7 @@ switch column
             
         end
         
-    case 'par'
+    case 'par_2015'
         
         conductance = [0.1*ones(1, 4), 0.2, 0.1*ones(1, 8);... % g_L
             0.6, 0, 3, 1, 0, 2, 0, 8, 3, 0, 8, 0, 3;... % g_M
@@ -371,6 +373,8 @@ switch column
 end
 
 end
+
+%% Getting connectivity matrices.
 
 function [fanout, gSYN, GJ, gNMDA, no_mechanisms, ESYN, tauRx, tauDx] = get_connectivity(column, ach_flag, pop_list, included)
 
@@ -397,6 +401,12 @@ switch column
             0, .2, .2, 0, 0, .02, .02, .05, .15;... % from deepRS
             0, 0, 0, 0, 0, .1, .1, .5, .3;... % from deepFS
             0, 0, 0, 0, .4, .3, .3, .6, .4]; % from deepSI
+        
+        if ach_flag
+            
+            gSYN(end, :) = 2.*gSYN(end, :);
+            
+        end
         
     case 'a1_2015'
         
@@ -426,7 +436,7 @@ switch column
             
         end
         
-    case 'par'
+    case 'par_2015'
         
         fanout = [10, 20, 10, 0, 0, 20, 20, 20, 0;... % from supRS
             10, 10, 10, 8, 0, 0, 0, 0, 0;... % from supFS
@@ -500,7 +510,7 @@ GJ = zeros(no_pops, no_pops);
 
 switch column
     
-    case 'par'
+    case 'par_2015'
         
         GJ = .04*double(IBaxon_index)'*IBaxon_index;
         gNMDA = FS_index*.01 + SI_index*.05;
