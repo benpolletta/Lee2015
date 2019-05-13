@@ -1,7 +1,7 @@
 % Deep RS soma (adapted from Lee 2015).
 % usage: dsPlot(dsSimulate('deepRSsoma','vary',{'deepRSsoma','Iapp',5}))
 
-deepRSsoma:
+% deepRSsoma:
 dV/dt=@current./Cm; {iTonic,IBiNaF,IBiKDR,iLeak}@current; V(0)=-65;
 gNaF=100; gKDR=80;
 

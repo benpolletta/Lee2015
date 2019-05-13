@@ -1,7 +1,7 @@
 % Deep RS axon (adapted from Lee 2015)
 % usage: dsPlot(dsSimulate('deepRSaxon','vary',{'deepRSaxon','Iapp',5}))
 
-deepRSaxon:
+% deepRSaxon:
 dV/dt=@current./Cm; {iTonic,IBiNaF,IBiKDR,iLeak,IBiM}@current; V(0)=-65;
 gNaF=100; gKDR=80;
 

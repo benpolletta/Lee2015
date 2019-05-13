@@ -1,7 +1,7 @@
 % IB axon (adapted from Lee 2015).
 % usage: dsPlot(dsSimulate('IBaxon','vary',{'IBaxon','Iapp',5}))
 
-deepIBaxon:
+% deepIBaxon:
 dV/dt=@current./Cm; {iTonic,IBiNaF,IBiKDR,iLeak,IBiMMich}@current; V(0)=-65;
 gNaF=100; gKDR=80;
 
