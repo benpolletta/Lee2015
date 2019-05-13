@@ -9,9 +9,12 @@ tauD=2; 	% ms, exponential decay time constant
 tau1=0; 	% ms, delay of spike time
 gExt=1;		% input strength
 EExt=0;
+ExtOn=0;
+ExtOff=T(end);
+ExtTrial=T(end);
 
 p = multi_Poisson_matlab(Npop, 1, rate, frequency, power, tau1, tauD, Tend, dt)
 
 psps(t) = gExt.*p(:, max(1,round(t/dt)))';
-Itrain(t,V) = psps(t).*(V-EExt);
+Itrain(t,V) = psps(t).*double(mod(t,ExtTrial)<ExtOff & mod(t,ExtTrial)>=ExtOn).*(V-EExt);
 @current += -Itrain(t,V)

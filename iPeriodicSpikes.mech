@@ -15,8 +15,9 @@ Tend = T(end); 	    % ms, max simulation duration
 dt = 0.01;        % ms, time step duration
 Sonset = 0;    % ms, onset time
 Soffset = Inf;   % ms, offset time
+Strial = Inf;
 
-psp = rhythmic_spike(tau_d,tau_1,Sfreq,Sshift,Tend,dt,Sonset,Soffset,Npop,inputs_per_cell,jitter)
+psp = rhythmic_spike(tau_d,tau_1,Sfreq,Sshift,Tend,dt,Sonset,Soffset,Npop,inputs_per_cell,jitter,Strial)
 
 % Functions
 input(X) = psp(k,:)

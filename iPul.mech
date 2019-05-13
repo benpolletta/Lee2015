@@ -1,0 +1,20 @@
+% iPul.mech (connection mechanism: spikes from precomputed and saved spike train)
+% Poisson exponential synapse (one-to-one connectivity)
+
+ratePul=100; 	% Hz, Poisson spike rate
+frequencyPul=0; % rhythm of inputs
+powerPul=7;
+TendPul=T(end); 	% ms, duration
+tauDPul=2; 	% ms, exponential decay time constant
+tau1Pul=0; 	% ms, delay of spike time
+gExtPul=1;		% input strength
+EExtPul=0;
+PulOn = 0;
+PulOff = T(end);
+PulTrial = T(end);
+
+pPul = multi_Poisson_matlab(Npop, 1, ratePul, frequencyPul, powerPul, tau1Pul, tauDPul, TendPul, dt)
+
+pspsPul(t) = gExtPul.*double(mod(t,PulTrial)<PulOff & mod(t,PulTrial)>=PulOn).*pPul(:, max(1,round(t/dt)))';
+ItrainPul(t,V) = pspsPul(t).*(V-EExtPul);
+@current += -ItrainPul(t,V)

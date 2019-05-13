@@ -1,0 +1,26 @@
+%% iSpikesPul.mech
+
+% Spike train properties
+gSpikePul = .1;
+EsynPul = 0;
+tau_dPul = 5; % decay time, in ms
+tau_1Pul = 0; % rise time, in ms
+SfreqPul = 20; % in Hz
+SshiftPul = 0; % in ms
+inputs_per_cellPul = 1;
+jitterPul = 0; % 1000/SfreqPul*.05; % in ms
+
+% Time series properties
+TendPul = T(end); 	    % ms, max simulation duration
+% dt = 0.01;        % ms, time step duration
+SonsetPul = 0;    % ms, onset time
+SoffsetPul = Inf;   % ms, offset time
+StrialPul = Inf;
+
+pspPul = rhythmic_spike(tau_dPul,tau_1Pul,SfreqPul,SshiftPul,TendPul,dt,SonsetPul,SoffsetPul,Npop,inputs_per_cellPul,jitterPul,StrialPul)
+
+% Functions
+inputPul(X) = pspPul(k,:)
+IspikePul(X) = gSpikePul.*inputPul(X).*(X-EsynPul)
+
+@current += -IspikePul(X)
