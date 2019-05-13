@@ -13,7 +13,7 @@ minf(V) = 1./(1+exp((AR_V12+V)/AR_k)) % 1./(1+exp((AR_V12-V)/AR_k))
 mtau(V) = 1./(AR_L.*exp(-14.6-.086*V)+AR_R.*exp(-1.87+.07*V))
 aM(V) = c_ARaM.*(minf(V) ./ mtau(V))
 bM(V) = c_ARbM.*((1-minf(V))./mtau(V))
-IAR(V,m) = gAR.*m.*(V-E_AR)
+IAR(V,mAR) = gAR.*mAR.*(V-E_AR)
  
 mAR' = aM(V).*(1-mAR)-bM(V).*mAR;
 mAR(0) = IC+IC_noise.*rand(Npop,1)
