@@ -12,7 +12,7 @@ column_names = {'C1', 'C2'};
 
 li = 1;
 
-[LFP, Pow] = deal(nan(length(time), length(column_names)*length(layers)));
+LFP = nan(length(time), length(column_names)*length(layers));
 Spec = nan(length(time), 100, length(column_names)*length(layers));
 
 for c = 1:length(column_names)
