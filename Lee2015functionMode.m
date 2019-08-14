@@ -19,12 +19,22 @@ savepath = fullfile(pwd, 'Sims', Today);
 mkdir(savepath);
 
 unpack_sim_struct
-
+    
 [sim_spec, sim_label] = Lee2015simSpec(column, ach_flag, bottom_up_flag, top_down_flag, excluded, column_name);
 
 if exist('simulation', 'var')
     
-    vary = get_sim_vary(simulation); 
+    sim_struct_in = sim_struct;
+    
+    [vary, sim_struct] = get_sim_vary(simulation);
+    
+    unpack_sim_struct
+    
+    sim_struct = sim_struct_in;
+   
+    sim_struct.vary = vary;
+    
+    [sim_spec, sim_label] = Lee2015simSpec(column, ach_flag, bottom_up_flag, top_down_flag, excluded, column_name);
     
     sim_label = [sim_label, '_', simulation];
 
@@ -90,7 +100,7 @@ cd (start_dir)
 
 end
 
-function sim_vary = get_sim_vary(simulation)
+function [sim_vary, sim_struct] = get_sim_vary(simulation)
     
 if strcmp(simulation, 'LIP')
     
@@ -103,6 +113,8 @@ if strcmp(simulation, 'LIP')
         'Iapp', permute([2 1 1 2 1 1; 5 4 4 5 4 4], [3 1 2]);...
         };
     
+    sim_struct = struct();
+    
 elseif strcmp(simulation, 'LIP_theta')
     
     sim_vary = {'(C1L4RS,C1L4FS,C2L4RS,C2L4FS)', 'rate', [50 100];...
@@ -113,6 +125,8 @@ elseif strcmp(simulation, 'LIP_theta')
         '(C1deepSI->C1deepIBdendrite,C2deepSI->C2deepIBdendrite)', 'gSYN', 0;...
         '(C1deepIBdendrite,C1deepRSdendrite,C2deepIBdendrite,C2deepRSdendrite)', 'Sfreq', 25;...
         };
+    
+    sim_struct = struct();
 
 elseif strcmp(simulation, 'Pul_Poisson')
     
@@ -122,6 +136,8 @@ elseif strcmp(simulation, 'Pul_Poisson')
         '(C1deepSI->C1deepIBdendrite,C2deepSI->C2deepIBdendrite)', 'gSYN', 0;...
         '(C1deepIBdendrite,C1deepRSdendrite,C2deepIBdendrite,C2deepRSdendrite)', 'Sfreq', 25;...
         };
+    
+    sim_struct = struct();
     
 elseif strcmp(simulation, 'Pul_Poisson_theta')
     
@@ -140,6 +156,8 @@ elseif strcmp(simulation, 'Pul_Poisson_theta')
         '(C1deepIBdendrite,C1deepRSdendrite,C2deepIBdendrite,C2deepRSdendrite)', 'Sfreq', 25;...
         };
     
+    sim_struct = struct();
+    
 elseif strcmp(simulation, 'Pul_Spikes')
     
     sim_vary = {'(C2L4RS,C2L4FS)', 'rate', [50 100];...
@@ -148,6 +166,8 @@ elseif strcmp(simulation, 'Pul_Spikes')
         '(C1deepSI->C1deepIBdendrite,C2deepSI->C2deepIBdendrite)', 'gSYN', 0;...
         '(C1deepIBdendrite,C1deepRSdendrite,C2deepIBdendrite,C2deepRSdendrite)', 'Sfreq', 25;...
         };
+    
+    sim_struct = struct();
     
 elseif strcmp(simulation, 'Pul_Spikes_theta')
     
@@ -165,6 +185,27 @@ elseif strcmp(simulation, 'Pul_Spikes_theta')
         '(C1deepSI->C1deepIBdendrite,C2deepSI->C2deepIBdendrite)', 'gSYN', 0;...
         '(C1deepIBdendrite,C1deepRSdendrite,C2deepIBdendrite,C2deepRSdendrite)', 'Sfreq', 25;...
         };
+    
+    sim_struct = struct();
+    
+elseif strcmp(simulation, 'L4alpha')
+    
+    sim_vary = {'L4RS->L4RS', 'mechanism_list', '+iNMDA';...
+        'L4RS->L4RS', 'gNMDA', 0:.01:.05;...
+        'L4RS->L4RS', 'gMg', 0;... 0:.2:1;...
+        'L4RS', 'gKCNH', 0:1:10;...
+        'L4RS', 'gExt', 0:.02:.2;...
+        };
+
+    keys = {'column', 'ach_flag', 'bottom_up_flag', 'top_down_flag',...
+        'excluded', 'column_name',...
+        };
+    
+    values = {'par_2015', 0, 1, 0,...
+        {'deep', 'sup', 'FS'}, '',...
+        };
+    
+    sim_struct = init_struct(keys, values);
     
 end           
     
@@ -184,53 +225,77 @@ elseif isstr(column_name)
     
 end
 
-no_sims = length(data);
+no_pops = sum(contains(fields(data), '_V') & contains(fields(data), column_name{1}));
 
-for s = 1:no_sims
-    
+if no_columns == 1 & no_pops <= 4
+        
     fig1 = figure;
     
-    for c = 1:no_columns
-        
-        axis = subplot(1, no_columns, c);
-        
-        if c == 1
-            
-            dsPlot(data(s), 'variable', [column_name{c}, '*V'], 'lock_gca', 1)
-            
-        else
-            
-            dsPlot(data(s), 'variable', [column_name{c}, '*V'], 'lock_gca', 1, 'suppress_textstring', 1)
-            
-        end
-        
-    end
+    dsPlot(data, 'suppress_textstring', 1)
     
-    saveas(fig1, fullfile(savepath, [name, '_fig', num2str(s), '.fig']))
+    saveas(fig1, fullfile(savepath, [name, '.fig']))
     
-    save_as_pdf(fig1, fullfile(savepath, [name, '_fig', num2str(s)]))
+    save_as_pdf(fig1, fullfile(savepath, name))
     
     fig2 = figure;
     
-    for c = 1:no_columns
+    dsPlot(data, 'suppress_textstring', 1, 'plot_type', 'raster')
+    
+    saveas(fig2, fullfile(savepath, [name, '_raster.fig']))
+    
+    save_as_pdf(fig2, fullfile(savepath, [name, '_raster']))
         
-        axis = subplot(1, no_columns, c);
+else
+    
+    no_sims = length(data);
+    
+    for s = 1:no_sims
         
-        if c == 1
+        fig1 = figure;
         
-            dsPlot(data(s), 'variable', [column_name{c}, '*V'], 'lock_gca', 1, 'plot_type', 'rastergram')
+        for c = 1:no_columns
             
-        else
-        
-            dsPlot(data(s), 'variable', [column_name{c}, '*V'], 'lock_gca', 1, 'plot_type', 'rastergram', 'suppress_textstring', 1)
+            axis = subplot(1, no_columns, c);
+            
+            if c == 1
+                
+                dsPlot(data(s), 'variable', [column_name{c}, '*V'], 'lock_gca', 1)
+                
+            else
+                
+                dsPlot(data(s), 'variable', [column_name{c}, '*V'], 'lock_gca', 1, 'suppress_textstring', 1)
+                
+            end
             
         end
         
+        saveas(fig1, fullfile(savepath, [name, '_fig', num2str(s), '.fig']))
+        
+        save_as_pdf(fig1, fullfile(savepath, [name, '_fig', num2str(s)]))
+        
+        fig2 = figure;
+        
+        for c = 1:no_columns
+            
+            axis = subplot(1, no_columns, c);
+            
+            if c == 1
+                
+                dsPlot(data(s), 'variable', [column_name{c}, '*V'], 'lock_gca', 1, 'plot_type', 'rastergram')
+                
+            else
+                
+                dsPlot(data(s), 'variable', [column_name{c}, '*V'], 'lock_gca', 1, 'plot_type', 'rastergram', 'suppress_textstring', 1)
+                
+            end
+            
+        end
+        
+        saveas(fig2, fullfile(savepath, [name, '_fig', num2str(s), '_raster.fig']))
+        
+        save_as_pdf(fig2, fullfile(savepath, [name, '_fig', num2str(s), '_raster']))
+        
     end
-    
-    saveas(fig2, fullfile(savepath, [name, '_fig', num2str(s), '_raster.fig']))
-    
-    save_as_pdf(fig2, fullfile(savepath, [name, '_fig', num2str(s), '_raster']))
     
 end
 

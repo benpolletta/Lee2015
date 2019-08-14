@@ -31,9 +31,11 @@ for a = 1:length(top_down_flag), label = [label, num2str(top_down_flag(a), '%d')
 label = [label, '_bu'];
 for a = 1:length(bottom_up_flag), label = [label, num2str(bottom_up_flag(a), '%d')]; end
 
+multicolumn_flag = iscell(column_name) & (length(column_name) > 1);
+
 %% In case more than one column.
 
-if iscell(column_name)
+if multicolumn_flag
     
     sim_spec = struct();
    
@@ -128,163 +130,173 @@ if iscell(column_name)
     
     return
     
-end
-
 %% In case single column.
-
-sim_spec = struct();
-
-pop_list = {'supRS', 'supFS', 'supSI',...
-    'L4RS', 'L4FS',...
-    'deepIBdendrite', 'deepIBsoma', 'deepIBaxon',...
-    'deepRSdendrite', 'deepRSsoma', 'deepRSaxon',...
-    'deepFS', 'deepSI'};
-
-no_pops = length(pop_list);
-
-multicomp_pops = {'deepIB', 'deepRS'};
-
-compartments = {'dendrite', 'soma', 'axon'};
-
-included = true(no_pops, 1);
-mc_pops_included = true(length(multicomp_pops), 1);
-comps_included = true(length(compartments), 1);
-
-for e = 1:length(excluded)
-   
-    included(contains(pop_list, excluded{e})) = false;
     
-    mc_pops_included(contains(multicomp_pops, excluded{e})) = false;
+else
     
-    comps_included(contains(compartments, excluded{e})) = false;
+    sim_spec = struct();
     
-end
-
-pop_list(~included) = [];
-multicomp_pops(~mc_pops_included) = [];
-compartments(~comps_included) = [];
-
-label = ''; % sprintf('%s_ach%d_td%d_bu%d', column, ach_flag, top_down_flag, bottom_up_flag);
-
-if ~isempty(excluded)
+    pop_list = {'supRS', 'supFS', 'supSI',...
+        'L4RS', 'L4FS',...
+        'deepIBdendrite', 'deepIBsoma', 'deepIBaxon',...
+        'deepRSdendrite', 'deepRSsoma', 'deepRSaxon',...
+        'deepFS', 'deepSI'};
     
-    excluded_label = ['_NO_', strcat(excluded{:})]; 
+    no_pops = length(pop_list);
     
-    included_label = ['_', strcat(pop_list{:})];
+    multicomp_pops = {'deepIB', 'deepRS'};
     
-    if length(excluded_label) < length(included_label)
+    compartments = {'dendrite', 'soma', 'axon'};
+    
+    included = true(no_pops, 1);
+    mc_pops_included = true(length(multicomp_pops), 1);
+    comps_included = true(length(compartments), 1);
+    
+    for e = 1:length(excluded)
         
-        label = [label, excluded_label];
+        included(contains(pop_list, excluded{e})) = false;
+        
+        mc_pops_included(contains(multicomp_pops, excluded{e})) = false;
+        
+        comps_included(contains(compartments, excluded{e})) = false;
+        
+    end
+    
+    pop_list(~included) = [];
+    multicomp_pops(~mc_pops_included) = [];
+    compartments(~comps_included) = [];
+    
+    if multicolumn_flag
+        
+        label = '';
         
     else
         
-        label = [label, included_label];
-        
-    end
-
-end
-
-no_pops = length(pop_list); % pop_names = cellfun(@(x) [column_name, x], pop_list, 'UniformOutput', 0);
-
-param_list = {'gLeak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'IappSTD', 'gExt', 'rate', 'gSpike', 'Sfreq'};
-
-no_params = length(param_list);
-
-conductance = get_conductance(column, ach_flag, bottom_up_flag, top_down_flag);
-
-conductance = conductance(:, included);
-
-for pop = 1:no_pops
-
-    sim_spec.populations(pop).name = [column_name, pop_list{pop}];
-    sim_spec.populations(pop).equations = pop_list{pop};
-    sim_spec.populations(pop).size = 20;
-    
-    parameters = cell(1, 2*no_params);
-    
-    for param = 1:no_params
-        
-        parameters{2*param - 1} = param_list{param};
-        parameters{2*param} = conductance(param, pop);
+        label = sprintf('%s_ach%d_td%d_bu%d', column, ach_flag, top_down_flag, bottom_up_flag);
         
     end
     
-    sim_spec.populations(pop).parameters = parameters;
-
-end
-
-mechanisms = {'iSYN', 'iNMDA', 'iGAP'};
-
-[fanout, gSYN, GJ, gNMDA, no_mechanisms, ESYN, tauRx, tauDx] = get_connectivity(column, ach_flag, pop_list, included);
-
-C_index = 0;
-
-for p = 1:no_pops
-    
-    for q = 1:no_pops
+    if ~isempty(excluded)
         
-        if gSYN(p, q) > 0
+        excluded_label = ['_NO_', strcat(excluded{:})];
+        
+        included_label = ['_', strcat(pop_list{:})];
+        
+        if length(excluded_label) < length(included_label)
             
-            C_index = C_index + 1;
+            label = [label, excluded_label];
             
-            sim_spec.connections(C_index).direction = [column_name, pop_list{p}, '->', column_name, pop_list{q}];
+        else
             
-            sim_spec.connections(C_index).mechanism_list = mechanisms(1:no_mechanisms(p,q));
+            label = [label, included_label];
             
-            sim_spec.connections(C_index).parameters = {'gSYN', gSYN(p, q),...
-                'tauDx', tauDx(p, q), 'tauRx', tauRx(p, q),...
-                'ESYN', ESYN(p), 'fanout', fanout(p, q),...
-                'fanoutNMDA', 10, 'gNMDA', gNMDA(p,q)}; % supEtosupI(p,q)*gNMDA(q),...
+        end
+        
+    end
+    
+    no_pops = length(pop_list); % pop_names = cellfun(@(x) [column_name, x], pop_list, 'UniformOutput', 0);
+    
+    param_list = {'gLeak', 'gM', 'gCaH', 'gCaL', 'gAR', 'Iapp', 'IappSTD', 'gExt', 'rate', 'gSpike', 'Sfreq'};
+    
+    no_params = length(param_list);
+    
+    conductance = get_conductance(column, ach_flag, bottom_up_flag, top_down_flag);
+    
+    conductance = conductance(:, included);
+    
+    for pop = 1:no_pops
+        
+        sim_spec.populations(pop).name = [column_name, pop_list{pop}];
+        sim_spec.populations(pop).equations = pop_list{pop};
+        sim_spec.populations(pop).size = 20;
+        
+        parameters = cell(1, 2*no_params);
+        
+        for param = 1:no_params
             
-            if GJ(p, q) > 0
+            parameters{2*param - 1} = param_list{param};
+            parameters{2*param} = conductance(param, pop);
+            
+        end
+        
+        sim_spec.populations(pop).parameters = parameters;
+        
+    end
+    
+    mechanisms = {'iSYN', 'iNMDA', 'iGAP'};
+    
+    [fanout, gSYN, GJ, gNMDA, no_mechanisms, ESYN, tauRx, tauDx] = get_connectivity(column, ach_flag, pop_list, included);
+    
+    C_index = 0;
+    
+    for p = 1:no_pops
+        
+        for q = 1:no_pops
+            
+            if gSYN(p, q) > 0
                 
-                sim_spec.connections(C_index).mechanism_list = [sim_spec.connections(C_index).mechanism_list {'iGAP'}];
+                C_index = C_index + 1;
                 
-                sim_spec.connections(C_index).parameters = [sim_spec.connections(C_index).parameters {'fanoutGAP', 7, 'gGAP', GJ(p,q)}];
+                sim_spec.connections(C_index).direction = [column_name, pop_list{p}, '->', column_name, pop_list{q}];
+                
+                sim_spec.connections(C_index).mechanism_list = mechanisms(1:no_mechanisms(p,q));
+                
+                sim_spec.connections(C_index).parameters = {'gSYN', gSYN(p, q),...
+                    'tauDx', tauDx(p, q), 'tauRx', tauRx(p, q),...
+                    'ESYN', ESYN(p), 'fanout', fanout(p, q),...
+                    'fanoutNMDA', 10, 'gNMDA', gNMDA(p,q)}; % supEtosupI(p,q)*gNMDA(q),...
+                
+                if GJ(p, q) > 0
+                    
+                    sim_spec.connections(C_index).mechanism_list = [sim_spec.connections(C_index).mechanism_list {'iGAP'}];
+                    
+                    sim_spec.connections(C_index).parameters = [sim_spec.connections(C_index).parameters {'fanoutGAP', 7, 'gGAP', GJ(p,q)}];
+                    
+                end
+                
+            elseif GJ(p, q) > 0
+                
+                C_index = C_index + 1;
+                
+                sim_spec.connections(C_index).direction = [column_name, pop_list{p}, '->', column_name, pop_list{q}];
+                
+                sim_spec.connections(C_index).mechanism_list = {'iGAP'};
+                
+                sim_spec.connections(C_index).parameters = {'fanoutGAP', 7, 'gGAP', GJ(p,q)};
                 
             end
             
-        elseif GJ(p, q) > 0
-            
-            C_index = C_index + 1;
-            
-            sim_spec.connections(C_index).direction = [column_name, pop_list{p}, '->', column_name, pop_list{q}];
-            
-            sim_spec.connections(C_index).mechanism_list = {'iGAP'};
-            
-            sim_spec.connections(C_index).parameters = {'fanoutGAP', 7, 'gGAP', GJ(p,q)};
-            
         end
-
+        
     end
     
-end
-
-coupling = [0, 0.4, 0;... from dendrite
-    0.2, 0, 0.3;... from soma
-    0, 0.3, 0]; % from axon
-
-[I,J] = find(coupling > 0);
-
-for p = 1:length(multicomp_pops)
+    coupling = [0, 0.4, 0;... from dendrite
+        0.2, 0, 0.3;... from soma
+        0, 0.3, 0]; % from axon
     
-    pop_name = multicomp_pops{p};
+    [I,J] = find(coupling > 0);
     
-    for c = 1:length(I)
+    for p = 1:length(multicomp_pops)
         
-        pre_name = [column_name, pop_name, compartments{I(c)}];
+        pop_name = multicomp_pops{p};
         
-        post_name = [column_name, pop_name, compartments{J(c)}];
-        
-        if sum(contains(excluded, pre_name)) + sum(contains(excluded, post_name)) < 1
-        
-            C_index = C_index + 1;
+        for c = 1:length(I)
             
-            sim_spec.connections(C_index).direction = [pre_name, '->', post_name];
+            pre_name = [column_name, pop_name, compartments{I(c)}];
             
-            sim_spec.connections(C_index).mechanism_list = {'iCOM'};
+            post_name = [column_name, pop_name, compartments{J(c)}];
             
-            sim_spec.connections(C_index).parameters = {'gCOM', coupling(I(c),J(c))};
+            if sum(contains(excluded, pre_name)) + sum(contains(excluded, post_name)) < 1
+                
+                C_index = C_index + 1;
+                
+                sim_spec.connections(C_index).direction = [pre_name, '->', post_name];
+                
+                sim_spec.connections(C_index).mechanism_list = {'iCOM'};
+                
+                sim_spec.connections(C_index).parameters = {'gCOM', coupling(I(c),J(c))};
+                
+            end
             
         end
         
@@ -300,7 +312,7 @@ function conductance = get_conductance(column, ach_flag, bottom_up_flag, top_dow
 
 switch column
     
-    case 'a1_2013'
+    case 'a1_2013' %, 'L4alpha'}
         
         conductance = [0.1*ones(1, 13);... % g_L
             0.5, 0, 8, 0.3, 0, 4, 0, 2, 4, 0, 2, 0, 4;... % g_M
@@ -337,8 +349,10 @@ switch column
             zeros(1, 13);... % g_h
             -2, 0, 0, -10, -5, -5, -1.4, 0.8, -5, -1.4, 0.8, 4, -4;... % Iapp
             0.5*ones(1,3), 0, .5, .3, .1, .1, .3, .1, .1, .5, .8;... % IappSTD
-            .5, 0, 0, 0.1, .03, 0.1, 0, 0, 0.1, zeros(1, 4);... % g_ext
-            100*ones(1, 13)]; % rate
+            .5, 0, 0, 0.1, .03, 0.1, 0, 0, 0.1, zeros(1, 4);... % gExt
+            100*ones(1, 13); % rate
+            zeros(1, 13);... % gSpike
+            zeros(1, 13)];... % Sfreq
         
         if ach_flag
             
@@ -349,7 +363,7 @@ switch column
             
         end
         
-    case 'par_2015'
+    case {'par_2015', 'L4alpha'}
         
         conductance = [0.1*ones(1, 4), 0.2, 0.1*ones(1, 8);... % g_L
             0.6, 0, 3, 1, 0, 2, 0, 8, 3, 0, 8, 0, 3;... % g_M
@@ -358,8 +372,11 @@ switch column
             zeros(1, 5), 0.1, 0, 0, 0.1, zeros(1,4);... % g_h
             -4, 2, 2, 0, -4, -5, -5, -5, -1, -3, -2, 0, -3;... % Iapp
             0.5*ones(1,3), 0, .5, .3, .1, .1, .3, .1, .1, .5, .8;... % IappSTD
-            0.6, 0, 0, 0.2, 0.1, zeros(1, 8);... % g_ext
-            100*ones(1,13)]; % rate
+            0.6, 0, 0, 0.2, 0.1, zeros(1, 8);... % gExt
+            100*ones(1,13); % rate
+            zeros(1, 13);... % gSpike
+            zeros(1, 13)];... % Sfreq
+        
         
         if ach_flag
             
@@ -436,7 +453,7 @@ switch column
             
         end
         
-    case 'par_2015'
+    case {'par_2015', 'L4alpha'}
         
         fanout = [10, 20, 10, 0, 0, 20, 20, 20, 0;... % from supRS
             10, 10, 10, 8, 0, 0, 0, 0, 0;... % from supFS
@@ -509,26 +526,35 @@ no_pops = length(pop_list);
 GJ = zeros(no_pops, no_pops);
 
 switch column
-    
-    case 'par_2015'
-        
-        GJ = .04*double(IBaxon_index)'*IBaxon_index;
-        gNMDA = FS_index*.01 + SI_index*.05;
-        
-    case 'a1_2015'
-        
-        gNMDA = (FS_index + SI_index)*.01;
         
     case 'a1_2013'
         
         GJ = .002*double(IBaxon_index)'*IBaxon_index + .002*double(RSaxon_index)'*RSaxon_index;
         gNMDA = FS_index*.04 + SI_index*.03;
         
+        gNMDA = supEtosupI*diag(gNMDA);
+        
+    case 'a1_2015'
+        
+        gNMDA = (FS_index + SI_index)*.01;
+        
+        gNMDA = supEtosupI*diag(gNMDA);
+    
+    case 'par_2015'
+        
+        GJ = .04*double(IBaxon_index)'*IBaxon_index;
+        gNMDA = FS_index*.01 + SI_index*.05;
+        
+        gNMDA = supEtosupI*diag(gNMDA);
+        
+    case 'L4alpha'
+        
+        L4RS_index = E_index & ~deep_index & ~sup_index;
+        gNMDA = .05*double(L4RS_index)'*double(L4RS_index);
+        
 end
 
-gNMDA = supEtosupI*diag(gNMDA);
-
-no_mechanisms = ones(no_pops, no_pops) + double(supEtosupI > 0); %  + double(GJ > 0);
+no_mechanisms = ones(no_pops, no_pops) + double(gNMDA > 0); %  + double(GJ > 0);
 
 ESYN = (FS_index + SI_index)*(-80);
 
