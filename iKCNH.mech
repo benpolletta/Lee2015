@@ -1,0 +1,20 @@
+gKCNH = [10]
+KCNH_V1 = [80]
+KCNH_d1 = [20]
+KCNH_V2 = [20]
+KCNH_d2 = [45]
+E_KCNH = [-95]
+IC = [0]
+IC_noise = [0.01]
+ 
+minf(X) = 1./(1+exp((-X-KCNH_V1)/KCNH_d1))
+mtau(X) = 200+600.*exp(-abs(X+KCNH_V2)./KCNH_d2)
+aM(X) = minf(X)./ mtau(X)
+bM(X) = (1-minf(X))./mtau(X)
+IKCNH(X,mKCNH) = gKCNH.*mKCNH.^4.*(X-E_KCNH)
+ 
+mKCNH' = aM(X).*(1-mKCNH)-bM(X).*mKCNH;
+mKCNH(0) = IC+IC_noise.*rand(Npop,1)
+ 
+@current += -IKCNH(V,mKCNH)
+ 
