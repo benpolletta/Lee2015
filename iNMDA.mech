@@ -10,6 +10,7 @@ Vpp = [2] % mV       % page 5: Vpp = 2        % mV, transmitter half activation
 Kp = [5]             % page 5: Kp = 5        % transmitter steepness
 IC = [0]
 IC_noise = [0]
+gMg = 1; % strength of Mg block.
 
 % fixed variables
 fanoutNMDA = inf
@@ -20,7 +21,7 @@ netcon = Xpre-Xpost >= 0 & Xpre-Xpost < fanoutNMDA | Xpre-Xpost < 0 & UB-(Xpost-
 % netcon = ones(Npre,Npost) % default connectivity matrix (all-to-all)
 
 % functions
-BMg(Vpost) = 1./(1+exp(-.062*Vpost)*1.5/3.57)		% sigmoidal magnesium block from [Methods in Neuronal Modeling, page 9]
+BMg(Vpost) = (1 - gMg) + gMg./(1+exp(-.062*Vpost)*1.5/3.57)		% sigmoidal magnesium block from [Methods in Neuronal Modeling, page 9]
 %BMg(X) = (1.50265./(1+0.33*exp(X./(-16)))) 	% sigmoidal magnesium block from [DS00], increases gradually to 1.50265 with postsynaptic voltage above -50mV (i.e., any Vpost EPSPs)
 NT(Vpre) = Tmax./(1+exp(-(Vpre-Vpp)/Kp)) 		% sigmoidal neurotransmitter concentration [T] increasing rapidly to Tmax with presynaptic voltage above 0mV (i.e., Vpre spike)
 INMDA(Vpost,s) = gNMDA.*BMg(Vpost).*(s*netcon).*(Vpost-ENMDA) % post-synaptic NMDA current
